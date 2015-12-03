@@ -1,0 +1,222 @@
+{{extend 'layout.html'}}
+
+<div class = "header">
+    <div class ="title">Game of the Year
+    </br>2015
+    </div>
+    {{if auth.user_id is None:}}
+    <h2>
+        {{=A('Sign Up', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['register']))}}
+        &nbsp
+        {{=A('Sign In', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['login']))}}
+    </h2>
+    {{else:}}
+    <h2>
+        {{=A('Logout', _class='btn btn-danger btn-lg', _href=URL('default', 'user', args=['logout']))}}
+    </h2>
+    {{pass}}
+</div>
+
+<div id="target"></div>
+
+<script id="template" type="text/ractive">
+
+<h1>{% cat_name %}</h1>
+
+{{if auth.user_id is not None:}}
+<div class ="newBoPo">
+        <button class="btn btn-primary btn-lg" on-click="new-disc">Create a New Discussion</button>
+</div>
+{{pass}}
+{% draft_id %}
+
+<div class="categoriesList">
+    {% #disc_dict:disc_id %}
+         <div class="catDivList">
+           {% #if is_editing === false %}
+                {% disc_name %}
+                | Original Poster
+                | Number of Comments
+                | Number of Likes
+                <button class="btn btn-success" data-discid="{% disc_id %}" on-click="startedit">Edit</button>
+                <button class="btn btn-warning" data-discid="{% disc_id %}" on-click="delete-disc">Delete</button>
+           {% else %}
+                <textarea rows="1" cols="50" id="editarea" data-discid="{% disc_id %}" on-blur="editdone" data-areaid="{% disc_id %}" value="{% disc_name %}">
+                </textarea>
+           {% /if %}
+         </div>
+    {% /disc_dict %}
+</div>
+</script>
+
+<script>
+$(function() {
+  // Ractive object
+  var MAIN = new Ractive({
+    el: '#target',
+    template: '#template',
+    delimiters: ['{%', '%}'],
+    tripleDelimiters: ['{%%', '%%}'],
+    data: {
+      draft_id: "{{=draft_id}}",
+      user_id: "{{=user_id}}",
+      cat_name: "{{=cat_name}}",
+      cat_id: "{{=cat_id}}",
+      active_cat_name: "",
+      active_cat_id: "",
+      disc_dict: {}
+    },
+  });
+
+  // Loads the discussions to display
+  $.ajax("{{=URL('default', 'load_discs')}}",
+          {
+            data:  {
+              cat_id: MAIN.get('cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('disc_dict', data['disc_dict']);
+            }
+          }
+  );
+
+  // Called to update display of discussions
+  function update() {
+    $.ajax("{{=URL('default', 'load_discs')}}",
+          {
+            data:  {
+              cat_id: MAIN.get('cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('disc_dict', data['disc_dict']);
+            }
+          }
+    );
+  }
+
+  //Creates new, empty category
+  MAIN.on("new-disc", function(e) {
+     var x = MAIN.get('draft_id');
+     send_message('', x, false, true);
+     MAIN.set('draft_id', generateUUID());
+     $("#editarea").focus();
+  });
+
+   function send_message(disc_content, disc_id, is_draft, is_editing) {
+    $.ajax("{{=URL('default', 'add_disc', user_signature=True)}}",
+            {
+              data: {
+                disc: disc_content, // request.vars.disc
+                is_draft: is_draft, // request.vars.is_draft
+                disc_id: disc_id, // request.vars.disc_id
+                cat_loc: MAIN.get('cat_id'),
+                is_editing: is_editing
+              },
+              method: 'POST',
+              success: function() {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var disc_dict = MAIN.get('disc_dict');
+                if (disc_id in disc_dict) {
+                  // We have sent to the server a message/draft we have already in the dict.
+                  disc_dict[disc_id]['disc_name'] = disc_content;
+                  disc_dict[dic_id]['cat_loc'] = MAIN.get('cat_id');
+                  disc_dict[disc_id]['is_editing'] = false;
+                } else {
+                  // This is a new message or draft.  We have to create a new entry in the dict.
+                  disc_dict[disc_id] = {
+                    disc_name: disc_content,
+                    cat_loc: MAIN.get('cat_id')
+                  }
+                }
+                MAIN.set('disc_dict', disc_dict);
+              },
+              error: function() {}
+            }
+    );
+  }
+
+  MAIN.on("startedit", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('discid');
+    var disc_dict = MAIN.get('disc_dict');
+    //set is_editing to true
+     $.ajax("{{=URL('default', 'edit_disc', user_signature=True)}}",
+            {
+              data: {
+                disc_id: clicked_id, // request.vars.disc_id
+                is_editing: true
+              },
+              method: 'POST',
+              success: function() {
+              // Change the selected board to editing
+              var disc_dict = MAIN.get('disc_dict');
+              disc_dict[clicked_id]['is_editing'] = true;
+              MAIN.set('disc_dict', disc_dict);
+              },
+              error: function() {}
+            }
+     );
+    $("#editarea").focus();
+    MAIN.set('draft_id', clicked_id);
+  });
+
+  MAIN.on("editdone", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('discid');
+    var disc_dict = MAIN.get('disc_dict');
+    disc_dict[clicked_id]['is_editing'] = false;
+    var disc_content = disc_dict[clicked_id]['disc_name'];
+    send_message(disc_content, clicked_id, false, false);
+    MAIN.set('draft_id', generateUUID());
+    update();
+  });
+
+  //Deletes the selected board
+  MAIN.on("delete-disc", function(e) {
+     var t = $(e.original.target);
+     var clicked_id = t.data('discid');
+     $.ajax("{{=URL('default', 'delete_disc', user_signature=True)}}",
+          {
+          data: {
+                disc_id: clicked_id // request.vars.disc_id
+              },
+            method: 'DELETE',
+            success: function (result) {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var disc_dict = MAIN.get('disc_dict');
+                MAIN.set('disc_dict', disc_dict);
+                update();
+            }
+          }
+     );
+  });
+
+  MAIN.on("makeactive", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('catid');
+    var cat_dict = MAIN.get('cat_dict');
+    var cat_content = cat_dict[clicked_id]['cat_name'];
+    MAIN.set('active_cat_id', clicked_id);
+    MAIN.set('active_cat_name', cat_content);
+    update();
+  });
+
+
+  // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+  function generateUUID(){
+    var d = new Date().getTime();
+    if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now();; //use high-precision timer if available
+    }
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+  }
+
+});
+</script>

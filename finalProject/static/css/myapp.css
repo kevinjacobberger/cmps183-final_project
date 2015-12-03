@@ -1,0 +1,111 @@
+/* line 1, ../sass/_main.scss */
+.colorful {
+  color: #bb8833;
+}
+
+/* line 5, ../sass/_main.scss */
+.title {
+  color: #000000;
+  font-size: 2.5em;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #6194BC;
+  padding: 0.5em;
+  margin: 1em;
+  margin-top: 1em;
+  margin-bottom: 0em;
+  -moz-border-radius: 1em;
+  -webkit-border-radius: 1em;
+  border-radius: 1em;
+  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  display: inline-block;
+  border: 0.5em ridge #E4001B;
+}
+
+/* line 20, ../sass/_main.scss */
+h2 {
+  margin: 0em;
+  margin-right: 2em;
+  text-align: right;
+}
+
+/* line 26, ../sass/_main.scss */
+.header {
+  padding-top: 1.5;
+  background-color: #D1D1D1;
+  padding-bottom: 1.2em;
+  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+}
+
+/* line 33, ../sass/_main.scss */
+.catDiv {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
+  padding: 1em;
+  background-color: #D1D1D1;
+  width: 40em;
+  height: 3.5em;
+  vertical-align: top;
+  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  border: 0.2em outset #E4001B;
+}
+
+/* line 48, ../sass/_main.scss */
+.catDivList {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  padding: 1em;
+  background-color: #D1D1D1;
+  width: 55em;
+  height: 4em;
+  vertical-align: top;
+  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  border: 0.2em outset #E4001B;
+}
+
+/* line 62, ../sass/_main.scss */
+.categories {
+  margin: 1em;
+  padding: 2em;
+  background-color: #6194BC;
+  float: right;
+}
+
+/* line 69, ../sass/_main.scss */
+.categoriesList {
+  margin: 2em;
+  padding: 2em;
+  background-color: #6194BC;
+  float: center;
+}
+
+/* line 76, ../sass/_main.scss */
+.graphs {
+  width: 50em;
+  height: 30em;
+  margin: 2em;
+  padding: 2em;
+  background-color: #6194BC;
+  float: left;
+}
+
+/* line 85, ../sass/_main.scss */
+.discussions {
+  width: 50em;
+  height: 30em;
+  margin: 2em;
+  padding: 2em;
+  background-color: #6194BC;
+}

@@ -1,0 +1,213 @@
+{{extend 'layout.html'}}
+
+<div class = "header">
+    <div class ="title">Game of the Year
+    </br>2015
+    </div>
+    {{if auth.user_id is None:}}
+    <h2>
+        {{=A('Sign Up', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['register']))}}
+        &nbsp
+        {{=A('Sign In', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['login']))}}
+    </h2>
+    {{else:}}
+    <h2>
+        {{=A('Logout', _class='btn btn-danger btn-lg', _href=URL('default', 'user', args=['logout']))}}
+    </h2>
+    {{pass}}
+</div>
+
+<div id="target"></div>
+
+<script id="template" type="text/ractive">
+
+{% draft_id %}
+
+<div class="graphs">
+<h4>Graphs Placeholder
+{% active_cat_name %}
+{% active_cat_id %}
+</h4>
+</div>
+
+<div class="categories">
+    {% #cat_dict:cat_id %}
+         <div class="catDiv">
+           {% #if is_editing === false %}
+                {% cat_name %}
+                <a href="{% cat_url + "/" +cat_id %}">
+                    <button class="btn btn-primary">View Discussions for this Category</button></a>
+                <button class="btn btn-primary" data-catid="{% cat_id %}" on-click="makeactive">Activate</button>
+           {% else %}
+                <textarea rows="1" cols="16" id="editarea" data-catid="{% cat_id %}" on-blur="editdone" data-areaid="{% cat_id %}" value="{% cat_name %}">
+                </textarea>
+           {% /if %}
+         </div>
+    {% /cat_dict %}
+     <a href="{{=URL('default','catsList')}}">
+        <button class="btn btn-success">More Categories</button></a>
+</div>
+
+<div class="discussions">
+    {% #disc_dict:disc_id %}
+        <div class ="discList">
+            {% disc_name %}
+        </div>
+    {% /disc_dict %}
+</div>
+</script>
+
+<script>
+$(function() {
+  // Ractive object
+  var MAIN = new Ractive({
+    el: '#target',
+    template: '#template',
+    delimiters: ['{%', '%}'],
+    tripleDelimiters: ['{%%', '%%}'],
+    data: {
+      draft_id: "{{=draft_id}}",
+      active_cat_name: "{{=active_cat_name}}",
+      active_cat_id: "{{=active_cat_id}}",
+      cat_url: "{{=URL('default','show_cat')}}",
+      cat_dict: {},
+      disc_dict: {}
+    },
+  });
+
+  // Loads the categories to display
+  $.ajax("{{=URL('default', 'load_cats')}}",
+          {
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('cat_dict', data['cat_dict']);
+            }
+          }
+  );
+
+   // Loads the discussions to display
+  $.ajax("{{=URL('default', 'load_discs')}}",
+          {
+            data:  {
+              cat_id: MAIN.get('active_cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('disc_dict', data['disc_dict']);
+            }
+          }
+  );
+
+  // Called to update display of boards
+  function update() {
+    $.ajax("{{=URL('default', 'load_cats')}}",
+          {
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('cat_dict', data['cat_dict']);
+            }
+          }
+    );
+  }
+
+  //Creates new, empty category
+  MAIN.on("new-cat", function(e) {
+     var x = MAIN.get('draft_id');
+     send_message('', x, false, true);
+     MAIN.set('draft_id', generateUUID());
+     $("#editarea").focus();
+  });
+
+   function send_message(cat_content, cat_id, is_draft, is_editing) {
+    $.ajax("{{=URL('default', 'add_cat', user_signature=True)}}",
+            {
+              data: {
+                cat: cat_content, // request.vars.cat
+                is_draft: is_draft, // request.vars.is_draft
+                cat_id: cat_id, // request.vars.cat_id
+                is_editing: is_editing
+              },
+              method: 'POST',
+              success: function() {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var cat_dict = MAIN.get('cat_dict');
+                if (cat_id in cat_dict) {
+                  // We have sent to the server a message/draft we have already in the dict.
+                  cat_dict[cat_id]['cat_name'] = cat_content;
+                  cat_dict[cat_id]['is_editing'] = false;
+                } else {
+                  // This is a new message or draft.  We have to create a new entry in the dict.
+                  cat_dict[cat_id] = {
+                    cat_name: cat_content
+                  }
+                }
+                MAIN.set('cat_dict', cat_dict);
+              },
+              error: function() {}
+            }
+    );
+  }
+
+  MAIN.on("startedit", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('catid');
+    var cat_dict = MAIN.get('cat_dict');
+    //set is_editing to true
+     $.ajax("{{=URL('default', 'edit_cat', user_signature=True)}}",
+            {
+              data: {
+                cat_id: clicked_id, // request.vars.cat_id
+                is_editing: true
+              },
+              method: 'POST',
+              success: function() {
+              // Change the selected board to editing
+              var cat_dict = MAIN.get('cat_dict');
+              cat_dict[clicked_id]['is_editing'] = true;
+              MAIN.set('cat_dict', cat_dict);
+              },
+              error: function() {}
+            }
+     );
+    $("#editarea").focus();
+    MAIN.set('draft_id', clicked_id);
+  });
+
+  MAIN.on("editdone", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('catid');
+    var cat_dict = MAIN.get('cat_dict');
+    cat_dict[clicked_id]['is_editing'] = false;
+    var cat_content = cat_dict[clicked_id]['cat_name'];
+    send_message(cat_content, clicked_id, false, false);
+    MAIN.set('draft_id', generateUUID());
+    update();
+  });
+
+  MAIN.on("makeactive", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('catid');
+    var cat_dict = MAIN.get('cat_dict');
+    var cat_content = cat_dict[clicked_id]['cat_name'];
+    MAIN.set('active_cat_id', clicked_id);
+    MAIN.set('active_cat_name', cat_content);
+    update();
+  });
+
+
+  // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+  function generateUUID(){
+    var d = new Date().getTime();
+    if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now();; //use high-precision timer if available
+    }
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+  }
+
+});
+</script>
