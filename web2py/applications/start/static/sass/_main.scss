@@ -1,3 +1,92 @@
 .colorful {
   color: $clrHilight;
 }
+
+.title {
+  color: $clrBlack;
+  font-size: 2.5em;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: $clrTiBg;
+  padding: 0.5em;
+  margin: 1em;
+  margin-top: 1em;
+  margin-bottom: 0em;
+  @include border-radius(1em);
+  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+  display: inline-block;
+  border: 0.5em ridge $clrTitle;
+}
+
+h2 {
+    margin: 0em;
+    margin-right: 2em;
+    text-align: right;
+}
+
+.header {
+  padding-top: 1.5;
+  background-color: $clrGreyBg;
+  padding-bottom: 1.2em;
+  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+}
+
+.catDiv {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
+  padding: 1em;
+  background-color: $clrGreyBg;
+  width: 40em;
+  height: 3.5em;
+  vertical-align: top;
+  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+  border: 0.2em outset $clrTitle;
+}
+
+.catDivList {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  padding: 1em;
+  background-color: $clrGreyBg;
+  width: 55em;
+  height: 4em;
+  vertical-align: top;
+  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+  border: 0.2em outset $clrTitle;
+}
+
+.categories {
+  margin: 1em;
+  padding: 2em;
+  background-color: $clrTiBg;
+  float: right;
+}
+
+.categoriesList {
+  margin: 2em;
+  padding: 2em;
+  background-color: $clrTiBg;
+  float: center;
+}
+
+.graphs {
+  width: 50em;
+  height: 30em;
+  margin: 2em;
+  padding: 2em;
+  background-color: $clrTiBg;
+  float: left;
+}
+
+.discussions {
+  width: 50em;
+  height: 30em;
+  margin: 2em;
+  padding: 2em;
+  background-color: $clrTiBg;
+
+}

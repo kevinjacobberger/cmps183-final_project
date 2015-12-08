@@ -1,15 +1,80 @@
-{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
 {{extend 'layout.html'}}
+<body>
+<div class = "header">
+    <div class ="title">Game of the Year
+    </br>2015
+    </div>
+    {{if auth.user_id is None:}}
+    <h2>
+        {{=A('Sign Up', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['register']))}}
+        &nbsp
+        {{=A('Sign In', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['login']))}}
+    </h2>
+    {{else:}}
+    <h2>
+        {{=A('Logout', _class='btn btn-danger btn-lg', _href=URL('default', 'user', args=['logout']))}}
+    </h2>
+    {{pass}}
+</div>
 
 <div id="target"></div>
 
 <script id="template" type="text/ractive">
-  {% #if editing %}
-  <textarea id="editarea" on-blur="editdone" data-areaid="3" value="{% mytext %}">
-  </textarea>
-  {% else %}
-  <div on-click="startedit"><p>{% mytext %}</p></div>
-  {% /if %}
+
+{% draft_id %}
+{% active_cat_name %}
+{% active_cat_id %}
+<div class="graphs">
+<h4>{%top3[0]['title']%} {%top3[1]['title']%}  {%top3[2]['title']%}</h4>
+
+
+
+<svg width = "100%" height = "80%" >
+
+<rect x='0' y='0' width = '10em' height = '{%top3[0]['votePercent']%}%'/>
+
+<rect x='18em' y='{%top3[1]['percentDif']%}%' width = '10em' height = '{%top3[1]['votePercent']%}%'/>
+
+<rect x='36em' y='0' width = '10em' height = '{%top3[2]['votePercent']%}%'/>
+
+</svg>
+
+<button class="btn btn-primary" data-catid="{% cat_id %}" on-click="add_game">Add Game</button>
+<select value='{%selectedGame%}'>
+{%#game_dict:game_id%}
+<option value='{%game_id%}'>{%game_dict[game_id]['title']%} {%game_dict[game_id]['votes']%}</option>
+{%/game_dict%}
+</select>
+<button class="btn btn-primary" data-game_id="{% selectedGame %}" on-click="cast_vote">Vote</button>
+<button class="btn btn-primary" data-game_id="{% selectedGame %}" on-click="see_vote">{%game_dict[selectedGame]['title']%}</button>
+
+</div>
+
+<div class="categories">
+    {% #cat_dict:cat_id %}
+         <div class="catDiv">
+           {% #if is_editing === false %}
+                {% cat_name %}
+                <a href="{% cat_url + "/" +cat_id %}">
+                    <button class="btn btn-primary">View Discussions for this Category</button></a>
+                <button class="btn btn-primary" data-catid="{% cat_id %}" on-click="makeactive">Activate</button>
+           {% else %}
+                <textarea rows="1" cols="16" id="editarea" data-catid="{% cat_id %}" on-blur="editdone" data-areaid="{% cat_id %}" value="{% cat_name %}">
+                </textarea>
+           {% /if %}
+         </div>
+    {% /cat_dict %}
+     <a href="{{=URL('default','catsList')}}">
+        <button class="btn btn-success">More Categories</button></a>
+</div>
+
+<div class="discussions">
+    {% #disc_dict:disc_id %}
+        <div class ="discList">
+            {% disc_name %}
+        </div>
+    {% /disc_dict %}
+</div>
 </script>
 
 <script>
@@ -21,22 +86,254 @@ $(function() {
     delimiters: ['{%', '%}'],
     tripleDelimiters: ['{%%', '%%}'],
     data: {
-      mytext: "Initial text",
-      editing: false
+      draft_id: "{{=draft_id}}",
+      active_cat_name: "{{=active_cat_name}}",
+      active_cat_id: "{{=active_cat_id}}",
+      cat_url: "{{=URL('default','show_cat')}}",
+      cat_dict: {},
+      disc_dict: {},
+      game_dict: {},
+      game_chart_ordered:[],
+      top3:{}
     },
   });
 
-  MAIN.on("startedit", function() {
-    MAIN.set("editing", true);
+  // Loads the categories to display
+  $.ajax("{{=URL('default', 'load_cats')}}",
+          {
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('cat_dict', data['cat_dict']);
+            }
+          }
+  );
+
+
+   // Loads the discussions to display
+  $.ajax("{{=URL('default', 'load_discs')}}",
+          {
+            data:  {
+              cat_id: MAIN.get('active_cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('disc_dict', data['disc_dict']);
+            }
+          }
+  );
+
+       // Loads the games to vote for
+  $.ajax("{{=URL('default', 'load_games')}}",
+          {
+              data:  {
+                cat_id: MAIN.get('active_cat_id')  //request.vars.cat_id
+            },
+
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('game_dict', data['game_dict']);
+              top3();
+            }
+          }
+  );
+
+
+        //Orders an array of games by # of votes, get top 3
+    function top3() {
+        var game_chart_ordered = [];
+        var game_dict = MAIN.get('game_dict');
+        var num_games = 0;
+        for (game_id in game_dict) {
+            num_games = num_games + 1;
+        }
+        var i = 0;
+        for (game_id in game_dict) {
+            game_chart_ordered.push([]);
+            game_chart_ordered[i].push(game_dict[game_id]['title']);
+            game_chart_ordered[i].push(game_dict[game_id]['votes']);
+            i=i+1;
+        }
+        game_chart_ordered.sort(function(a,b){
+                return a[1]<b[1]
+        });
+        MAIN.set('game_chart_ordered', game_chart_ordered);
+
+        var game_chart_ordered = MAIN.get('game_chart_ordered');
+        var denominator = game_chart_ordered[0][1];
+        for (i=0;i<3;i++){
+            top3[i] = {
+                title: game_chart_ordered[i][0],
+                votes: game_chart_ordered[i][1],
+                votePercent: toPercent(game_chart_ordered[i][1],denominator),
+                percentDif: (100 - toPercent(game_chart_ordered[i][1],denominator))
+            }
+        }
+        MAIN.set('top3', top3);
+
+    }
+
+    function toPercent(votes, denominator){
+        var voteToPercent=(votes / denominator)*100;
+        return voteToPercent;
+    }
+
+  // Called to update display of boards
+  function update() {
+    $.ajax("{{=URL('default', 'load_cats')}}",
+          {
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('cat_dict', data['cat_dict']);
+            }
+          }
+    );
+  }
+
+  //Creates new, empty category
+  MAIN.on("new-cat", function(e) {
+     var x = MAIN.get('draft_id');
+     send_message('', x, false, true);
+     MAIN.set('draft_id', generateUUID());
+     $("#editarea").focus();
+  });
+
+   function send_message(cat_content, cat_id, is_draft, is_editing) {
+    $.ajax("{{=URL('default', 'add_cat', user_signature=True)}}",
+            {
+              data: {
+                cat: cat_content, // request.vars.cat
+                is_draft: is_draft, // request.vars.is_draft
+                cat_id: cat_id, // request.vars.cat_id
+                is_editing: is_editing
+              },
+              method: 'POST',
+              success: function() {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var cat_dict = MAIN.get('cat_dict');
+                if (cat_id in cat_dict) {
+                  // We have sent to the server a message/draft we have already in the dict.
+                  cat_dict[cat_id]['cat_name'] = cat_content;
+                  cat_dict[cat_id]['is_editing'] = false;
+                } else {
+                  // This is a new message or draft.  We have to create a new entry in the dict.
+                  cat_dict[cat_id] = {
+                    cat_name: cat_content
+                  }
+                }
+                MAIN.set('cat_dict', cat_dict);
+              },
+              error: function() {}
+            }
+    );
+  }
+
+  MAIN.on("startedit", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('catid');
+    var cat_dict = MAIN.get('cat_dict');
+    //set is_editing to true
+     $.ajax("{{=URL('default', 'edit_cat', user_signature=True)}}",
+            {
+              data: {
+                cat_id: clicked_id, // request.vars.cat_id
+                is_editing: true
+              },
+              method: 'POST',
+              success: function() {
+              // Change the selected board to editing
+              var cat_dict = MAIN.get('cat_dict');
+              cat_dict[clicked_id]['is_editing'] = true;
+              MAIN.set('cat_dict', cat_dict);
+              },
+              error: function() {}
+            }
+     );
     $("#editarea").focus();
+    MAIN.set('draft_id', clicked_id);
   });
 
   MAIN.on("editdone", function(e) {
-    MAIN.set("editing", false);
-    var myval = MAIN.get("mytext");
-    var areaid = $(e.node).data("areaid");
-    alert(myval + " " + areaid);
-  })
+    var t = $(e.original.target);
+    var clicked_id = t.data('catid');
+    var cat_dict = MAIN.get('cat_dict');
+    cat_dict[clicked_id]['is_editing'] = false;
+    var cat_content = cat_dict[clicked_id]['cat_name'];
+    send_message(cat_content, clicked_id, false, false);
+    MAIN.set('draft_id', generateUUID());
+    update();
+  });
+
+  MAIN.on("makeactive", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('catid');
+    var cat_dict = MAIN.get('cat_dict');
+    var cat_content = cat_dict[clicked_id]['cat_name'];
+    MAIN.set('active_cat_id', clicked_id);
+    MAIN.set('active_cat_name', cat_content);
+    update();
+  });
+
+
+  MAIN.on("add_game", function(e) {
+      var t = $(e.original.target);
+      var clicked_id = t.data('catid');
+      var cat_loc = "{{=active_cat_id}}";
+      var cat_dict = MAIN.get('cat_dict');
+      var game_dict = MAIN.get('game_dict');
+      var game_id = generateUUID();
+      game_dict[game_id] = {
+          title: "",
+          game_id: game_id,
+          cat_loc:"{{=active_cat_id}}",
+          votes: ""
+      }
+      window.location.href= "add_game" + '/' + cat_loc + '/' + game_id;
+  });
+
+  MAIN.on("cast_vote", function(e) {
+     var t = $(e.original.target);
+     var sel_game_id = t.data('game_id');
+     var game_dict = MAIN.get('game_dict');
+      alert(game_dict[sel_game_id]['title']);
+     var votes = game_dict[sel_game_id]['votes']+1;
+    $.ajax("{{=URL('default', 'cast_vote', user_signature=True)}}",
+            {
+              data: {
+                game_id: sel_game_id, // request.vars.game_id
+                votes: votes, // request.vars.votes
+              },
+              method: 'POST',
+              success: function() {
+                  game_dict[sel_game_id]['votes']= votes;
+                  MAIN.set('game_dict',game_dict);
+              },
+              error: function() {}
+            }
+    );
+  });
+
+      MAIN.on("see_vote", function(e) {
+          var t = $(e.original.target);
+          var sel_game_id = t.data('game_id');
+          var game_dict = MAIN.get('game_dict');
+          alert(game_dict[sel_game_id]['title']);
+      });
+
+
+  // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+  function generateUUID(){
+    var d = new Date().getTime();
+    if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now();; //use high-precision timer if available
+    }
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+  }
 
 });
 </script>
+</body>
