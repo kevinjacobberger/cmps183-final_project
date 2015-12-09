@@ -53,10 +53,25 @@ def load_discs():
                         'is_editing': r.is_editing,
                         'cat_loc': r.cat_loc,
                         'author': r.author,
+                        'likes': r.likes,
+                        'dislikes': r.dislikes,
                         }
          for r in discs_list}
     response.flash = T("Discs Loaded")
     return response.json(dict(disc_dict=d))
+
+def load_games():
+    """Loads the correct discs within each cat"""
+    games_list = db(db.games.cat_loc == request.vars.cat_id).select(db.games.ALL)
+    d = {r.game_id: {'game_name': r.game_name,
+                        'is_editing': r.is_editing,
+                        'cat_loc': r.cat_loc,
+                        'author': r.author,
+                        'game_votes': r.game_votes,
+                        }
+         for r in games_list}
+    response.flash = T("Games Loaded")
+    return response.json(dict(game_dict=d))
 
 @auth.requires_signature()
 def add_cat():
@@ -75,6 +90,18 @@ def add_disc():
             disc_name=request.vars.disc,
             cat_loc=request.vars.cat_loc,
             is_editing=request.vars.is_editing)
+    response.flash = T("Disc Created")
+    return "ok"
+
+@auth.requires_signature()
+def add_game():
+    db.games.update_or_insert((db.games.game_id == request.vars.game_id),
+            author=request.vars.user_id,
+            game_id=request.vars.game_id,
+            game_name=request.vars.game,
+            cat_loc=request.vars.cat_loc,
+            game_votes=0,
+            is_editing=request.vars.is_editing)
     return "ok"
 
 @auth.requires_signature()
@@ -90,6 +117,17 @@ def edit_disc():
     return "ok"
 
 @auth.requires_signature()
+def edit_game():
+    db.games.update_or_insert((db.games.game_id == request.vars.game_id),
+            is_editing=request.vars.is_editing)
+    return "ok"
+
+def cast_vote():
+    db.games.update_or_insert((db.games.game_id == request.vars.game_id),
+            game_votes=request.vars.votes)
+    return "ok"
+
+@auth.requires_signature()
 def delete_cat():
     cat_to_delete = request.vars.cat_id
     """delete the selected Category"""
@@ -101,6 +139,13 @@ def delete_disc():
     disc_to_delete = request.vars.disc_id
     """delete the selected Discussion"""
     db(db.discs.disc_id == disc_to_delete).delete()
+    return "ok"
+
+@auth.requires_signature()
+def delete_game():
+    game_to_delete = request.vars.game_id
+    """delete the selected Game"""
+    db(db.games.game_id == game_to_delete).delete()
     return "ok"
 
 def user():
