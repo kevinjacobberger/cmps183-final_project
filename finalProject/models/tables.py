@@ -34,4 +34,16 @@ db.define_table('discs',
              Field('disc_time', 'datetime', default=datetime.utcnow()),
              Field('front_runner', 'text'),
              Field('cat_loc'), # Reference to the category
+             Field('likes', 'integer', default=0),
+             Field('dislikes', 'integer', default=0),
+            )
+
+db.define_table('games',
+             Field('author', db.auth_user, default=auth.user_id),
+             Field('game_name', 'text'),
+             Field('game_id'), # To uniquely identify categories.
+             Field('is_editing', 'boolean', default=False),
+             Field('game_time', 'datetime', default=datetime.utcnow()),
+             Field('game_votes', 'integer', default=0),
+             Field('cat_loc'), # Reference to the category
             )

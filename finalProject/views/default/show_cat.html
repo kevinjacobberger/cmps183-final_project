@@ -25,6 +25,29 @@
 
 {{if auth.user_id is not None:}}
 <div class ="newBoPo">
+        <button class="btn btn-primary btn-lg" on-click="new-game">Create a New Game</button>
+</div>
+{{pass}}
+
+<div class="categoriesList">
+    {% #game_dict:game_id %}
+         <div class="catDivList">
+           {% #if is_editing === false %}
+                {% game_name %}
+                {% game_votes %} Votes
+                <button class="btn btn-primary" data-gameid="{% game_id %}" on-click="cast-vote">Vote</button>
+                <button class="btn btn-success" data-gameid="{% game_id %}" on-click="starteditGame">Edit</button>
+                <button class="btn btn-warning" data-gameid="{% game_id %}" on-click="delete-game">Delete</button>
+           {% else %}
+                <textarea rows="1" cols="50" id="editarea" data-gameid="{% game_id %}" on-blur="editdoneGame" data-areaid="{% game_id %}" value="{% game_name %}">
+                </textarea>
+           {% /if %}
+         </div>
+    {% /game_dict %}
+</div>
+
+{{if auth.user_id is not None:}}
+<div class ="newBoPo">
         <button class="btn btn-primary btn-lg" on-click="new-disc">Create a New Discussion</button>
 </div>
 {{pass}}
@@ -35,7 +58,7 @@
          <div class="catDivList">
            {% #if is_editing === false %}
                 {% disc_name %}
-                | Original Poster
+                | Posted by {% author %}
                 | Number of Comments
                 | Number of Likes
                 <button class="btn btn-success" data-discid="{% disc_id %}" on-click="startedit">Edit</button>
@@ -64,6 +87,7 @@ $(function() {
       cat_id: "{{=cat_id}}",
       active_cat_name: "",
       active_cat_id: "",
+      game_dict: {},
       disc_dict: {}
     },
   });
@@ -81,6 +105,19 @@ $(function() {
           }
   );
 
+  // Loads the games to display
+  $.ajax("{{=URL('default', 'load_games')}}",
+          {
+            data:  {
+              cat_id: MAIN.get('cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('game_dict', data['game_dict']);
+            }
+          }
+  );
+
   // Called to update display of discussions
   function update() {
     $.ajax("{{=URL('default', 'load_discs')}}",
@@ -94,12 +131,31 @@ $(function() {
             }
           }
     );
+    $.ajax("{{=URL('default', 'load_games')}}",
+          {
+            data:  {
+              cat_id: MAIN.get('cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('game_dict', data['game_dict']);
+            }
+          }
+    );
   }
 
-  //Creates new, empty category
+  //Creates new, empty discussion
   MAIN.on("new-disc", function(e) {
      var x = MAIN.get('draft_id');
      send_message('', x, false, true);
+     MAIN.set('draft_id', generateUUID());
+     $("#editarea").focus();
+  });
+
+  //Creates new, empty game
+  MAIN.on("new-game", function(e) {
+     var x = MAIN.get('draft_id');
+     send_game('', x, false, true);
      MAIN.set('draft_id', generateUUID());
      $("#editarea").focus();
   });
@@ -108,6 +164,7 @@ $(function() {
     $.ajax("{{=URL('default', 'add_disc', user_signature=True)}}",
             {
               data: {
+                user_id: MAIN.get('user_id'),
                 disc: disc_content, // request.vars.disc
                 is_draft: is_draft, // request.vars.is_draft
                 disc_id: disc_id, // request.vars.disc_id
@@ -127,10 +184,44 @@ $(function() {
                   // This is a new message or draft.  We have to create a new entry in the dict.
                   disc_dict[disc_id] = {
                     disc_name: disc_content,
+                    game_votes: 0,
                     cat_loc: MAIN.get('cat_id')
                   }
                 }
                 MAIN.set('disc_dict', disc_dict);
+              },
+              error: function() {}
+            }
+    );
+  }
+
+  function send_game(game_content, game_id, is_draft, is_editing) {
+    $.ajax("{{=URL('default', 'add_game', user_signature=True)}}",
+            {
+              data: {
+                game: game_content, // request.vars.disc
+                is_draft: is_draft, // request.vars.is_draft
+                game_id: game_id, // request.vars.disc_id
+                cat_loc: MAIN.get('cat_id'),
+                is_editing: is_editing
+              },
+              method: 'POST',
+              success: function() {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var game_dict = MAIN.get('game_dict');
+                if (game_id in game_dict) {
+                  // We have sent to the server a message/draft we have already in the dict.
+                  game_dict[game_id]['game_name'] = game_content;
+                  game_dict[game_id]['game_loc'] = MAIN.get('game_id');
+                  game_dict[game_id]['is_editing'] = false;
+                } else {
+                  // This is a new message or draft.  We have to create a new entry in the dict.
+                  game_dict[game_id] = {
+                    game_name: game_content,
+                    cat_loc: MAIN.get('cat_id')
+                  }
+                }
+                MAIN.set('game_dict', game_dict);
               },
               error: function() {}
             }
@@ -162,6 +253,31 @@ $(function() {
     MAIN.set('draft_id', clicked_id);
   });
 
+  MAIN.on("starteditGame", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('gameid');
+    var game_dict = MAIN.get('game_dict');
+    //set is_editing to true
+     $.ajax("{{=URL('default', 'edit_game', user_signature=True)}}",
+            {
+              data: {
+                game_id: clicked_id, // request.vars.game_id
+                is_editing: true
+              },
+              method: 'POST',
+              success: function() {
+              // Change the selected board to editing
+              var game_dict = MAIN.get('game_dict');
+              game_dict[clicked_id]['is_editing'] = true;
+              MAIN.set('game_dict', game_dict);
+              },
+              error: function() {}
+            }
+     );
+    $("#editarea").focus();
+    MAIN.set('draft_id', clicked_id);
+  });
+
   MAIN.on("editdone", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('discid');
@@ -173,7 +289,18 @@ $(function() {
     update();
   });
 
-  //Deletes the selected board
+   MAIN.on("editdoneGame", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('gameid');
+    var game_dict = MAIN.get('game_dict');
+    game_dict[clicked_id]['is_editing'] = false;
+    var game_content = game_dict[clicked_id]['game_name'];
+    send_game(game_content, clicked_id, false, false);
+    MAIN.set('draft_id', generateUUID());
+    update();
+  });
+
+  //Deletes the selected discussion
   MAIN.on("delete-disc", function(e) {
      var t = $(e.original.target);
      var clicked_id = t.data('discid');
@@ -193,14 +320,46 @@ $(function() {
      );
   });
 
-  MAIN.on("makeactive", function(e) {
-    var t = $(e.original.target);
-    var clicked_id = t.data('catid');
-    var cat_dict = MAIN.get('cat_dict');
-    var cat_content = cat_dict[clicked_id]['cat_name'];
-    MAIN.set('active_cat_id', clicked_id);
-    MAIN.set('active_cat_name', cat_content);
-    update();
+  //Deletes the selected discussion
+  MAIN.on("delete-game", function(e) {
+     var t = $(e.original.target);
+     var clicked_id = t.data('gameid');
+     $.ajax("{{=URL('default', 'delete_game', user_signature=True)}}",
+          {
+          data: {
+                game_id: clicked_id // request.vars.disc_id
+              },
+            method: 'DELETE',
+            success: function (result) {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var game_dict = MAIN.get('game_dict');
+                MAIN.set('game_dict', game_dict);
+                update();
+            }
+          }
+     );
+  });
+
+  MAIN.on("cast-vote", function(e) {
+     var t = $(e.original.target);
+     var sel_game_id = t.data('gameid');
+     var game_dict = MAIN.get('game_dict');
+     var votes = game_dict[sel_game_id]['game_votes']+1;
+    $.ajax("{{=URL('default', 'cast_vote', user_signature=True)}}",
+            {
+              data: {
+                game_id: sel_game_id, // request.vars.game_id
+                votes: votes // request.vars.votes
+              },
+              method: 'POST',
+              success: function() {
+                  game_dict[sel_game_id]['game_votes']= votes;
+                  MAIN.set('game_dict',game_dict);
+                  update();
+              },
+              error: function() {}
+            }
+    );
   });
 
 
