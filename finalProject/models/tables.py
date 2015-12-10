@@ -47,3 +47,10 @@ db.define_table('games',
              Field('game_votes', 'integer', default=0),
              Field('cat_loc'), # Reference to the category
             )
+
+db.define_table('votes',
+             Field('author', db.auth_user, default=auth.user_id),
+             Field('game_id'), # Reference to the game.
+             Field('cat_loc'), # Reference to the category
+             Field('has_voted', 'boolean', default=False),
+            )

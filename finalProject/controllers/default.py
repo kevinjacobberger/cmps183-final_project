@@ -16,7 +16,7 @@ import json
 def index():
     draft_id = gluon_utils.web2py_uuid()
     """Fetch the Game of the Year Category as the default active Category"""
-    rows = db(db.cats.cat_name == "Game of the Year").select(db.cats.ALL)
+    rows = db(db.cats.cat_name == "Monkeys").select(db.cats.ALL)
     first_cat = rows.first()
     active_cat_id = first_cat.cat_id
     active_cat_name = first_cat.cat_name
@@ -28,14 +28,24 @@ def catsList():
     return dict(draft_id=draft_id, user_id=user_id)
 
 def show_cat():
+    query = (db.votes.author==auth.user_id) & (db.votes.cat_loc==request.args(0))
+    rows = db(query).select(db.votes.ALL)
+    user_vote = rows.first()
+    has_voted = False;
+    if user_vote is None:
+        session.flash = T("votes None")
+        has_voted = False
+    else:
+        session.flash = T("votes not None")
+        has_voted = user_vote.has_voted
     draft_id = gluon_utils.web2py_uuid()
     cat_id = request.args(0)
     rows = db(db.cats.cat_id == cat_id).select(db.cats.ALL)
     first_cat = rows.first()
     cat_name = first_cat.cat_name
     user_id = auth.user_id
-    response.flash = T(cat_name)
-    return dict(draft_id=draft_id, cat_name=cat_name, cat_id=cat_id, user_id=user_id)
+    has_voted = json.dumps(has_voted)
+    return dict(draft_id=draft_id, cat_name=cat_name, cat_id=cat_id, user_id=user_id,has_voted=has_voted)
 
 def load_cats():
     """Loads all Categories"""
@@ -57,20 +67,19 @@ def load_discs():
                         'dislikes': r.dislikes,
                         }
          for r in discs_list}
-    response.flash = T("Discs Loaded")
     return response.json(dict(disc_dict=d))
 
 def load_games():
     """Loads the correct discs within each cat"""
     games_list = db(db.games.cat_loc == request.vars.cat_id).select(db.games.ALL)
     d = {r.game_id: {'game_name': r.game_name,
+                        'game_id':r.game_id,
                         'is_editing': r.is_editing,
                         'cat_loc': r.cat_loc,
                         'author': r.author,
                         'game_votes': r.game_votes,
                         }
          for r in games_list}
-    response.flash = T("Games Loaded")
     return response.json(dict(game_dict=d))
 
 @auth.requires_signature()
@@ -125,6 +134,11 @@ def edit_game():
 def cast_vote():
     db.games.update_or_insert((db.games.game_id == request.vars.game_id),
             game_votes=request.vars.votes)
+    db.votes.update_or_insert((db.votes.author==auth.user_id) &
+            (db.votes.cat_loc==request.vars.cat_loc),
+            cat_loc=request.vars.cat_loc,
+            game_id=request.vars.game_id,
+            has_voted=True)
     return "ok"
 
 @auth.requires_signature()
@@ -147,6 +161,14 @@ def delete_game():
     """delete the selected Game"""
     db(db.games.game_id == game_to_delete).delete()
     return "ok"
+
+
+
+def reset():
+    db(db.votes.id > 0).delete()
+    session.flash = T("Database has been reset")
+    redirect(URL('default', 'index'))
+    return
 
 def user():
     """
