@@ -72,6 +72,7 @@ def load_games():
     """Loads the correct discs within each cat"""
     games_list = db(db.games.cat_loc == request.vars.cat_id).select(db.games.ALL)
     d = {r.game_id: {'game_name': r.game_name,
+                        'game_id':r.game_id,
                         'is_editing': r.is_editing,
                         'cat_loc': r.cat_loc,
                         'author': r.author,

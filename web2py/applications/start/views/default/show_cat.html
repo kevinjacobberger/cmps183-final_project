@@ -206,7 +206,7 @@ $(function() {
     $.ajax("{{=URL('default', 'add_game', user_signature=True)}}",
             {
               data: {
-                game: game_content, // request.vars.disc
+                game_name: game_content, // request.vars.disc
                 is_draft: is_draft, // request.vars.is_draft
                 game_id: game_id, // request.vars.disc_id
                 cat_loc: MAIN.get('cat_id'),
@@ -348,6 +348,9 @@ $(function() {
   });
 
   MAIN.on("cast-vote", function(e) {;
+     if({{=has_voted}}){
+     alert("You Have Already Voted");
+     }
      var t = $(e.original.target);
      var sel_game_id = t.data('gameid');
      var game_dict = MAIN.get('game_dict');
