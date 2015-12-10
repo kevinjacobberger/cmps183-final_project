@@ -44,7 +44,7 @@ def show_cat():
     first_cat = rows.first()
     cat_name = first_cat.cat_name
     user_id = auth.user_id
-    return dict(hello=hello,draft_id=draft_id, cat_name=cat_name, cat_id=cat_id, user_id=user_id,has_voted=has_voted)
+    return dict(draft_id=draft_id, cat_name=cat_name, cat_id=cat_id, user_id=user_id,has_voted=has_voted)
 
 def load_cats():
     """Loads all Categories"""
