@@ -16,7 +16,7 @@ import json
 def index():
     draft_id = gluon_utils.web2py_uuid()
     """Fetch the Game of the Year Category as the default active Category"""
-    rows = db(db.cats.cat_name == "Game of the Year").select(db.cats.ALL)
+    rows = db(db.cats.cat_name == "Monkeys").select(db.cats.ALL)
     first_cat = rows.first()
     active_cat_id = first_cat.cat_id
     active_cat_name = first_cat.cat_name
@@ -44,6 +44,7 @@ def show_cat():
     first_cat = rows.first()
     cat_name = first_cat.cat_name
     user_id = auth.user_id
+    has_voted = json.dumps(has_voted)
     return dict(draft_id=draft_id, cat_name=cat_name, cat_id=cat_id, user_id=user_id,has_voted=has_voted)
 
 def load_cats():
@@ -131,7 +132,6 @@ def edit_game():
     return "ok"
 
 def cast_vote():
-    db(db.votes.id > 0).delete()
     db.games.update_or_insert((db.games.game_id == request.vars.game_id),
             game_votes=request.vars.votes)
     db.votes.update_or_insert((db.votes.author==auth.user_id) &

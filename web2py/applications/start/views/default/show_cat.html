@@ -46,12 +46,6 @@
     {% /game_dict %}
 </div>
 
-
-
-
-<span>{{=has_voted}}</span>
-
-
 {{if auth.user_id is not None:}}
 <div class ="newBoPo">
         <button class="btn btn-primary btn-lg" on-click="new-disc">Create a New Discussion</button>
@@ -94,10 +88,10 @@ $(function() {
       active_cat_name: "",
       active_cat_id: "",
       game_dict: {},
-      disc_dict: {}
+      disc_dict: {},
+      has_voted: {{=has_voted}}
     },
   });
-
   // Loads the discussions to display
   $.ajax("{{=URL('default', 'load_discs')}}",
           {
@@ -110,7 +104,6 @@ $(function() {
             }
           }
   );
-
   // Loads the games to display
   $.ajax("{{=URL('default', 'load_games')}}",
           {
@@ -123,8 +116,6 @@ $(function() {
             }
           }
   );
-
-
   // Called to update display of discussions
   function update() {
     $.ajax("{{=URL('default', 'load_discs')}}",
@@ -150,7 +141,6 @@ $(function() {
           }
     );
   }
-
   //Creates new, empty discussion
   MAIN.on("new-disc", function(e) {
      var x = MAIN.get('draft_id');
@@ -158,7 +148,6 @@ $(function() {
      MAIN.set('draft_id', generateUUID());
      $("#editarea").focus();
   });
-
   //Creates new, empty game
   MAIN.on("new-game", function(e) {
      var x = MAIN.get('draft_id');
@@ -166,7 +155,6 @@ $(function() {
      MAIN.set('draft_id', generateUUID());
      $("#editarea").focus();
   });
-
    function send_message(disc_content, disc_id, is_draft, is_editing) {
     $.ajax("{{=URL('default', 'add_disc', user_signature=True)}}",
             {
@@ -201,12 +189,11 @@ $(function() {
             }
     );
   }
-
   function send_game(game_content, game_id, is_draft, is_editing) {
     $.ajax("{{=URL('default', 'add_game', user_signature=True)}}",
             {
               data: {
-                game_name: game_content, // request.vars.disc
+                game: game_content, // request.vars.disc
                 is_draft: is_draft, // request.vars.is_draft
                 game_id: game_id, // request.vars.disc_id
                 cat_loc: MAIN.get('cat_id'),
@@ -234,7 +221,6 @@ $(function() {
             }
     );
   }
-
   MAIN.on("startedit", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('discid');
@@ -259,7 +245,6 @@ $(function() {
     $("#editarea").focus();
     MAIN.set('draft_id', clicked_id);
   });
-
   MAIN.on("starteditGame", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('gameid');
@@ -284,7 +269,6 @@ $(function() {
     $("#editarea").focus();
     MAIN.set('draft_id', clicked_id);
   });
-
   MAIN.on("editdone", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('discid');
@@ -295,7 +279,6 @@ $(function() {
     MAIN.set('draft_id', generateUUID());
     update();
   });
-
    MAIN.on("editdoneGame", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('gameid');
@@ -306,7 +289,6 @@ $(function() {
     MAIN.set('draft_id', generateUUID());
     update();
   });
-
   //Deletes the selected discussion
   MAIN.on("delete-disc", function(e) {
      var t = $(e.original.target);
@@ -326,7 +308,6 @@ $(function() {
           }
      );
   });
-
   //Deletes the selected discussion
   MAIN.on("delete-game", function(e) {
      var t = $(e.original.target);
@@ -346,38 +327,37 @@ $(function() {
           }
      );
   });
-
-  MAIN.on("cast-vote", function(e) {;
-     if({{=has_voted}}){
-     alert("You Have Already Voted");
-     }
-     var t = $(e.original.target);
-     var sel_game_id = t.data('gameid');
-     var game_dict = MAIN.get('game_dict');
-     var votes = game_dict[sel_game_id]['game_votes']+1;
-     var cat_loc = MAIN.get('cat_id');
-      alert(sel_game_id);
-      alert(votes);
-      alert(cat_loc);
-    $.ajax("{{=URL('default', 'cast_vote', user_signature=True)}}",
-            {
-              data: {
-                game_id: sel_game_id, // request.vars.game_id
-                votes: votes, // request.vars.votes
-                cat_loc:cat_loc
-              },
-              method: 'POST',
-              success: function() {
-                  game_dict[sel_game_id]['game_votes']= votes;
-                  MAIN.set('game_dict',game_dict);
-                  update();
-              },
-              error: function() {}
-            }
-    );
-  });
-
-
+  MAIN.on("cast-vote", function(e) {
+      var has_voted = MAIN.get('has_voted');
+      if(has_voted){
+       alert("You Already Voted!");
+      }
+      else{
+          alert("else");
+          var t = $(e.original.target);
+          var sel_game_id = t.data('gameid');
+          var game_dict = MAIN.get('game_dict');
+          var votes = game_dict[sel_game_id]['game_votes'] + 1;
+          var cat_loc = MAIN.get('cat_id');
+          $.ajax("{{=URL('default', 'cast_vote', user_signature=True)}}",
+                  {
+                      data: {
+                          game_id: sel_game_id, // request.vars.game_id
+                          cat_loc:cat_loc,
+                          votes: votes // request.vars.votes
+                      },
+                      method: 'POST',
+                      success: function () {
+                          game_dict[sel_game_id]['game_votes'] = votes;
+                          MAIN.set('has_voted',true);
+                          MAIN.set('game_dict', game_dict);
+                          update();
+                      },
+                      error: function () {
+                      }
+                  }
+          );
+      }});
   // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
   function generateUUID(){
     var d = new Date().getTime();
@@ -391,6 +371,5 @@ $(function() {
     });
     return uuid;
   }
-
 });
 </script>

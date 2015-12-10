@@ -1,13 +1,15 @@
 {{extend 'layout.html'}}
 
+<div id="target"></div>
+
+<script id="template" type="text/ractive">
+
 <div class = "header">
-    <div class ="title">Game of the Year
-    </br>2015
+    <div class ="title">{%active_cat_name%}
     </div>
     {{if auth.user_id is None:}}
     <h2>
         {{=A('Sign Up', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['register']))}}
-        &nbsp
         {{=A('Sign In', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['login']))}}
     </h2>
     {{else:}}
@@ -15,28 +17,32 @@
         {{=A('Logout', _class='btn btn-danger btn-lg', _href=URL('default', 'user', args=['logout']))}}
     </h2>
     {{pass}}
-</div>
+    </div>
 
-<div id="target"></div>
 
-<script id="template" type="text/ractive">
-
-{% draft_id %}
 
 <div class="graphs">
-<h4>{%top3[0]['title']%} {%top3[1]['title']%}  {%top3[2]['title']%}</h4>
+<h4>
+{% #top3:g %}
+{%top3[g]['game_name']%}
+{%/top3%}
+{% #game_dict:game_id %}
+{%game_dict[game_id]['game_name']%}
+{%/top3%}
+{%top3[0]['game_name']%} {%top3[1]['game_name']%}  {%top3[2]['game_name']%}
 
+
+</h4>.
 
 <svg width = "100%" height = "80%" >
 
-<rect x='0' y='0' width = '10em' height = '{%top3[0]['votePercent']%}%'/>
+<rect x='0' y='{%top3[0]['percentDif']%}%' width = '10em' height = '{%top3[0]['votePercent']%}%'/>
 
 <rect x='18em' y='{%top3[1]['percentDif']%}%' width = '10em' height = '{%top3[1]['votePercent']%}%'/>
 
-<rect x='36em' y='0' width = '10em' height = '{%top3[2]['votePercent']%}%'/>
+<rect x='36em' y='{%top3[2]['percentDif']%}%' width = '10em' height = '{%top3[2]['votePercent']%}%'/>
 
 </svg>
-</h4>
 </div>
 
 <div class="categories">
@@ -84,9 +90,9 @@ $(function() {
       game_dict: {},
       game_chart_ordered:[],
       top3:{}
+
     },
   });
-
   // Loads the categories to display
   $.ajax("{{=URL('default', 'load_cats')}}",
           {
@@ -96,7 +102,6 @@ $(function() {
             }
           }
   );
-
    // Loads the discussions to display
   $.ajax("{{=URL('default', 'load_discs')}}",
           {
@@ -109,6 +114,7 @@ $(function() {
             }
           }
   );
+
 
            // Loads the games to vote for
   $.ajax("{{=URL('default', 'load_games')}}",
@@ -147,21 +153,22 @@ $(function() {
         var denominator = game_chart_ordered[0][1];
         for (i=0;i<3;i++){
             top3[i] = {
-                title: game_chart_ordered[i][0],
+                game_name: game_chart_ordered[i][0],
                 votes: game_chart_ordered[i][1],
                 votePercent: toPercent(game_chart_ordered[i][1],denominator),
                 percentDif: (100 - toPercent(game_chart_ordered[i][1],denominator))
+
             }
         }
         MAIN.set('top3', top3);
+        var top = MAIN.get('top3');
+        alert(top[0]['game_name']);
     }
 
     function toPercent(votes, denominator){
         var voteToPercent=(votes / denominator)*100;
         return voteToPercent;
     }
-
-
 
   // Called to update display of boards
   function update() {
@@ -170,12 +177,25 @@ $(function() {
             method: 'POST',
             success: function (data) {
               MAIN.set('cat_dict', data['cat_dict']);
-              top3();
             }
           }
     );
-  }
 
+               // Loads the games to vote for
+  $.ajax("{{=URL('default', 'load_games')}}",
+          {
+              data:  {
+                cat_id: MAIN.get('active_cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('game_dict', data['game_dict']);
+              top3();
+            }
+          }
+  );
+
+  }
   //Creates new, empty category
   MAIN.on("new-cat", function(e) {
      var x = MAIN.get('draft_id');
@@ -183,7 +203,6 @@ $(function() {
      MAIN.set('draft_id', generateUUID());
      $("#editarea").focus();
   });
-
    function send_message(cat_content, cat_id, is_draft, is_editing) {
     $.ajax("{{=URL('default', 'add_cat', user_signature=True)}}",
             {
@@ -213,7 +232,6 @@ $(function() {
             }
     );
   }
-
   MAIN.on("startedit", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('catid');
@@ -238,7 +256,6 @@ $(function() {
     $("#editarea").focus();
     MAIN.set('draft_id', clicked_id);
   });
-
   MAIN.on("editdone", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('catid');
@@ -249,7 +266,6 @@ $(function() {
     MAIN.set('draft_id', generateUUID());
     update();
   });
-
   MAIN.on("makeactive", function(e) {
     var t = $(e.original.target);
     var clicked_id = t.data('catid');
@@ -259,8 +275,6 @@ $(function() {
     MAIN.set('active_cat_name', cat_content);
     update();
   });
-
-
   // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
   function generateUUID(){
     var d = new Date().getTime();
@@ -274,6 +288,5 @@ $(function() {
     });
     return uuid;
   }
-
 });
 </script>
