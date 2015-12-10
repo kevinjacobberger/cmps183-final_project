@@ -24,6 +24,9 @@ db.define_table('cats',
              Field('is_editing', 'boolean', default=False),
              Field('cat_time', 'datetime', default=datetime.utcnow()),
              Field('front_runner', 'text'),
+             Field('front_votes', 'integer', default=0),
+             Field('total_votes', 'integer', default=0),
+             Field('total_discs', 'integer', default=0),
             )
 
 db.define_table('discs',
@@ -36,6 +39,7 @@ db.define_table('discs',
              Field('cat_loc'), # Reference to the category
              Field('likes', 'integer', default=0),
              Field('dislikes', 'integer', default=0),
+             Field('total_comments', 'integer', default=0),
             )
 
 db.define_table('games',
@@ -46,6 +50,13 @@ db.define_table('games',
              Field('game_time', 'datetime', default=datetime.utcnow()),
              Field('game_votes', 'integer', default=0),
              Field('cat_loc'), # Reference to the category
+            )
+
+db.define_table('votes',
+             Field('author', db.auth_user, default=auth.user_id),
+             Field('game_id'), # Reference to the game.
+             Field('cat_loc'), # Reference to the category
+             Field('has_voted', 'boolean', default=False),
             )
 
 db.define_table('comments',

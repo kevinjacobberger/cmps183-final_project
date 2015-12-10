@@ -2,7 +2,7 @@
 
 <div class = "header">
     <div class ="title">Game of the Year
-    </br>2015
+    </br>2015&nbsp&nbsp&nbsp&nbsp<i class="fa fa-gamepad"></i>
     </div>
     {{if auth.user_id is None:}}
     <h2>
@@ -54,21 +54,30 @@
         <button class="btn btn-primary btn-lg" on-click="new-disc">Create a New Discussion</button>
 </div>
 {{pass}}
-{% draft_id %}
 
 <div class="categoriesList">
     {% #disc_dict:disc_id %}
          <div class="catDivList">
            {% #if is_editing === false %}
-                {% disc_name %}
-                | Posted by {% author %}
-                | Number of Comments
+                <div class="catDivTitle">{% disc_name %}</div>
+                {% #if author == user_id %}
+                    <span id="fancy">&nbsp&nbsp&nbsp Posted by You!</span>
+                {% else %}
+                    <span id="fancy">&nbsp&nbsp&nbsp Posted by Somebody Else</span>
+                {% /if %}
+                {% #if total_comments > 0 %}
+                    | {% total_comments %} Comments <i class="fa fa-comments"></i>
+                {% else %}
+                    | {% total_comments %} Comments <i class="fa fa-comments-o"></i>
+                {% /if %}
                 <a href="{% disc_url + "/" +disc_id %}">
                     <button class="btn btn-primary">View Comments</button></a>
                 | {% likes %} <button class="fa fa-thumbs-o-up" data-discid="{% disc_id %}" on-click="cast-like">&nbspLike</button>
                 | {% dislikes %} <button class="fa fa-thumbs-o-down" data-discid="{% disc_id %}" on-click="cast-dislike">&nbspDislike</button>
+                {% #if author == user_id %}
                 <button class="btn btn-success" data-discid="{% disc_id %}" on-click="startedit">Edit</button>
                 <button class="btn btn-warning" data-discid="{% disc_id %}" on-click="delete-disc">Delete</button>
+                {% /if %}
            {% else %}
                 <textarea rows="1" cols="50" id="editarea" data-discid="{% disc_id %}" on-blur="editdone" data-areaid="{% disc_id %}" value="{% disc_name %}">
                 </textarea>

@@ -23,14 +23,32 @@
   border: 0.5em ridge #E4001B;
 }
 
-/* line 20, ../sass/_main.scss */
+/* line 21, ../sass/_main.scss */
+h1 {
+  margin: 0em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
+  padding: 0.5em;
+  background-color: #D1D1D1;
+  width: 20em;
+  height: 2.5em;
+  vertical-align: top;
+  display: inline-block;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  border: 0.2em outset #E4001B;
+}
+
+/* line 35, ../sass/_main.scss */
 h2 {
   margin: 0em;
   margin-right: 2em;
   text-align: right;
 }
 
-/* line 26, ../sass/_main.scss */
+/* line 41, ../sass/_main.scss */
 .header {
   padding-top: 1.5;
   background-color: #D1D1D1;
@@ -40,7 +58,7 @@ h2 {
   box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
 
-/* line 33, ../sass/_main.scss */
+/* line 48, ../sass/_main.scss */
 .catDiv {
   font-size: 1.5em;
   margin: 1em;
@@ -59,7 +77,7 @@ h2 {
   border: 0.2em outset #E4001B;
 }
 
-/* line 49, ../sass/_main.scss */
+/* line 64, ../sass/_main.scss */
 .discDiv {
   font-size: 1.5em;
   margin: 1em;
@@ -77,7 +95,7 @@ h2 {
   border: 0.2em outset #E4001B;
 }
 
-/* line 64, ../sass/_main.scss */
+/* line 79, ../sass/_main.scss */
 .catDivList {
   font-size: 1.5em;
   margin: 1em;
@@ -86,15 +104,29 @@ h2 {
   padding: 1em;
   background-color: #D1D1D1;
   width: 55em;
-  height: 4em;
+  height: 6em;
   vertical-align: top;
   -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   border: 0.2em outset #E4001B;
 }
+/* line 91, ../sass/_main.scss */
+.catDivList #bold {
+  font-weight: bold;
+}
+/* line 94, ../sass/_main.scss */
+.catDivList #fancy {
+  font-style: italic;
+}
 
-/* line 78, ../sass/_main.scss */
+/* line 99, ../sass/_main.scss */
+.catDivTitle {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* line 104, ../sass/_main.scss */
 .discList {
   font-size: 1.5em;
   margin: 1em;
@@ -112,7 +144,7 @@ h2 {
   border: 0.2em outset #E4001B;
 }
 
-/* line 93, ../sass/_main.scss */
+/* line 119, ../sass/_main.scss */
 .gameDiv {
   font-size: 1.5em;
   font-weight: bold;
@@ -125,7 +157,7 @@ h2 {
   padding-top: 1em;
   background-color: #D1D1D1;
   width: 11em;
-  height: 15em;
+  height: 16em;
   text-align: center;
   vertical-align: top;
   display: inline-block;
@@ -134,19 +166,19 @@ h2 {
   box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   border: 0.2em outset #E4001B;
 }
-/* line 111, ../sass/_main.scss */
+/* line 137, ../sass/_main.scss */
 .gameDiv #normal {
   font-style: normal;
 }
 
-/* line 116, ../sass/_main.scss */
+/* line 142, ../sass/_main.scss */
 hr {
   color: #FF0000;
   border-style: solid;
   border-width: 0.2em;
 }
 
-/* line 122, ../sass/_main.scss */
+/* line 148, ../sass/_main.scss */
 .categories {
   margin: 1em;
   padding: 2em;
@@ -157,18 +189,18 @@ hr {
   -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
-/* line 129, ../sass/_main.scss */
+/* line 155, ../sass/_main.scss */
 .categories #center {
   text-align: center;
 }
 
-/* line 134, ../sass/_main.scss */
+/* line 160, ../sass/_main.scss */
 .moreCats {
   font-size: 1.5em;
   text-align: center;
 }
 
-/* line 139, ../sass/_main.scss */
+/* line 165, ../sass/_main.scss */
 .categoriesList {
   margin: 2em;
   padding: 2em;
@@ -179,7 +211,7 @@ hr {
   box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
 
-/* line 148, ../sass/_main.scss */
+/* line 174, ../sass/_main.scss */
 .graphs {
   width: 60em;
   height: 30em;
@@ -194,7 +226,48 @@ hr {
   box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
 
-/* line 161, ../sass/_main.scss */
+/* line 186, ../sass/_main.scss */
+.left {
+  display: inline-block;
+  float: left;
+  width: 12em;
+}
+
+/* line 192, ../sass/_main.scss */
+.center {
+  display: inline-block;
+  float: left;
+  width: 12em;
+}
+
+/* line 198, ../sass/_main.scss */
+.right {
+  display: inline-block;
+  float: left;
+  width: 10em;
+}
+
+/* line 204, ../sass/_main.scss */
+.left_column {
+  fill: #FFFF00;
+}
+
+/* line 208, ../sass/_main.scss */
+.center_column {
+  fill: #00CC00;
+}
+
+/* line 212, ../sass/_main.scss */
+.right_column {
+  fill: #FF8000;
+}
+
+/* line 216, ../sass/_main.scss */
+rect {
+  stroke: #000000;
+}
+
+/* line 220, ../sass/_main.scss */
 .discussions {
   margin: 0.5em;
   margin-top: 0em;
@@ -208,7 +281,7 @@ hr {
   box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
 
-/* line 172, ../sass/_main.scss */
+/* line 231, ../sass/_main.scss */
 body {
   background-color: #000000;
 }

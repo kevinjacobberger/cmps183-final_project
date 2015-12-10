@@ -2,7 +2,7 @@
 
 <div class = "header">
     <div class ="title">Game of the Year
-    </br>2015
+    </br>2015&nbsp&nbsp&nbsp&nbsp<i class="fa fa-gamepad"></i>
     </div>
     {{if auth.user_id is None:}}
     <h2>
@@ -22,10 +22,19 @@
 <script id="template" type="text/ractive">
 
 <div class="graphs">
-<h4>Graphs Placeholder
-{% active_cat_name %}
-{% active_cat_id %}
-</h4>
+    <h4>
+    <span class = "left">{%top3[0]['game_name']%}</span> <span class = "center">{%top3[1]['game_name']%}</span>  <span class = "right">{%top3[2]['game_name']%}</span>
+    </h4>.
+
+    <svg width = "100%" height = "80%" >
+
+    <rect class = "left_column" x='0' y='{%top3[0]['percentDif']%}%' width = '10em' height = '{%top3[0]['votePercent']%}%'/>
+
+    <rect class = "center_column" x='18em' y='{%top3[1]['percentDif']%}%' width = '10em' height = '{%top3[1]['votePercent']%}%'/>
+
+    <rect class = "right_column" x='36em' y='{%top3[2]['percentDif']%}%' width = '10em' height = '{%top3[2]['votePercent']%}%'/>
+
+    </svg>
 </div>
 
 <div class="categories">
@@ -33,8 +42,19 @@
          <div class="catDiv">
            {% #if is_editing === false %}
                 {% cat_name %}
+                | {% front_runner %}
+                {% #if total_votes > 0 %}
+                    | {% total_votes %} <i class="fa fa-check-square-o"></i>
+                {% else %}
+                    | {% total_votes %} <i class="fa fa-square-o"></i>
+                {% /if %}
+                {% #if total_discs > 0 %}
+                    | {% total_discs %} <i class="fa fa-comments"></i>
+                {% else %}
+                    | {% total_discs %} <i class="fa fa-comments-o"></i>
+                {% /if %}
                 <a href="{% cat_url + "/" +cat_id %}">
-                    <button class="btn btn-primary">View Discussions for this Category</button></a>
+                    <button class="btn btn-primary">View Discussions</button></a>
                 <button class="btn btn-primary" data-catid="{% cat_id %}" on-click="makeactive">Activate</button>
            {% else %}
                 <textarea rows="1" cols="16" id="editarea" data-catid="{% cat_id %}" on-blur="editdone" data-areaid="{% cat_id %}" value="{% cat_name %}">
@@ -66,6 +86,12 @@
                 {% likes %} <i class="fa fa-thumbs-o-up"></i>
                 {% dislikes %} <i class="fa fa-thumbs-o-down"></i>
             {% /if %}
+            &nbsp
+            {% #if total_comments > 0 %}
+            | {% total_comments %} Comments <i class="fa fa-comments"></i>
+            {% else %}
+            | {% total_comments %} Comments <i class="fa fa-comments-o"></i>
+            {% /if %}
         </div>
     {% /disc_dict %}
 </div>
@@ -86,7 +112,9 @@ $(function() {
       cat_url: "{{=URL('default','show_cat')}}",
       disc_url: "{{=URL('default','show_comments')}}",
       cat_dict: {},
-      disc_dict: {}
+      disc_dict: {},
+      game_chart_ordered:[],
+      top3:{}
     },
   });
 
@@ -113,6 +141,73 @@ $(function() {
           }
   );
 
+             // Loads the games to vote for
+  $.ajax("{{=URL('default', 'load_games')}}",
+          {
+              data:  {
+                cat_id: MAIN.get('active_cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('game_dict', data['game_dict']);
+              top3(true);
+            }
+          }
+  );
+
+           //Orders an array of games by # of votes, get top 3
+    function top3(on_load) {
+        var game_chart_ordered = [];
+        var top3 = MAIN.get('top3');
+        var game_dict = MAIN.get('game_dict');
+        var num_games = 0;
+        for (game_id in game_dict) {
+            num_games = num_games + 1;
+        }
+        var i = 0;
+        for (game_id in game_dict) {
+            game_chart_ordered.push([]);
+            game_chart_ordered[i].push(game_dict[game_id]['game_name']);
+            game_chart_ordered[i].push(game_dict[game_id]['game_votes']);
+            i=i+1;
+        }
+        game_chart_ordered.sort(function(a,b){
+                return a[1]<b[1]
+        });
+        MAIN.set('game_chart_ordered', game_chart_ordered);
+        var game_chart_ordered = MAIN.get('game_chart_ordered');
+        var denominator = game_chart_ordered[0][1];
+     if(on_load) {
+         for (i = 0; i < 3; i++) {
+             top3[i] = {
+                 game_name: game_chart_ordered[i][0],
+                 votes: game_chart_ordered[i][1],
+                 votePercent: toPercent(game_chart_ordered[i][1], denominator),
+                 percentDif: (100 - toPercent(game_chart_ordered[i][1], denominator))
+
+             }
+         }
+
+        MAIN.set('top3', top3);
+     }
+     else{
+         for (i = 0; i < 3; i++) {
+             top3[i]['game_name']= game_chart_ordered[i][0];
+             top3[i]['votes']=game_chart_ordered[i][1];
+             top3[i]['votePercent']= toPercent(game_chart_ordered[i][1], denominator);
+             top3[i]['percentDif']= (100 - toPercent(game_chart_ordered[i][1], denominator));
+             }
+
+        MAIN.set('top3', top3);
+     }
+        var top = MAIN.get('top3');
+    }
+
+    function toPercent(votes, denominator){
+        var voteToPercent=(votes / denominator)*100;
+        return voteToPercent;
+    }
+
   // Called to update display of boards
   function update() {
     $.ajax("{{=URL('default', 'load_4_cats')}}",
@@ -131,6 +226,20 @@ $(function() {
             method: 'POST',
             success: function (data) {
               MAIN.set('disc_dict', data['disc_dict']);
+            }
+          }
+    );
+    // Loads the games to vote for
+    $.ajax("{{=URL('default', 'load_games')}}",
+          {
+              data:  {
+                cat_id: MAIN.get('active_cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('game_dict', data['game_dict']);
+                MAIN.get()
+              top3(false);
             }
           }
   );

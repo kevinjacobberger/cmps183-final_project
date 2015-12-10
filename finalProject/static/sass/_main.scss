@@ -17,6 +17,21 @@
   border: 0.5em ridge $clrTitle;
 }
 
+
+h1 {
+  margin: 0em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
+  padding: 0.5em;
+  background-color: $clrGreyBg;
+  width: 20em;
+  height: 2.5em;
+  vertical-align: top;
+  display: inline-block;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+  border: 0.2em outset $clrTitle;
+}
 h2 {
     margin: 0em;
     margin-right: 2em;
@@ -69,10 +84,21 @@ h2 {
   padding: 1em;
   background-color: $clrGreyBg;
   width: 55em;
-  height: 4em;
+  height: 6em;
   vertical-align: top;
   @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
   border: 0.2em outset $clrTitle;
+  #bold {
+    font-weight: bold;
+  }
+  #fancy {
+    font-style: italic;
+  }
+}
+
+.catDivTitle {
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .discList {
@@ -102,7 +128,7 @@ h2 {
   padding-top: 1em;
   background-color: $clrGreyBg;
   width: 11em;
-  height: 15em;
+  height: 16em;
   text-align: center;
   vertical-align: top;
   display: inline-block;
@@ -155,7 +181,40 @@ hr {
   background-color: $clrTiBg;
   float: left;
   @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+}
 
+.left {
+  display: inline-block;
+  float:left;
+  width:12em;
+}
+
+.center {
+  display: inline-block;
+  float:left;
+  width:12em;
+}
+
+.right {
+  display: inline-block;
+  float:left;
+  width:10em;
+}
+
+.left_column {
+  fill: #FFFF00;
+}
+
+.center_column {
+  fill: #00CC00;
+}
+
+.right_column {
+  fill: #FF8000;
+}
+
+rect {
+  stroke: #000000;
 }
 
 .discussions {

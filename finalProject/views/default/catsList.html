@@ -2,7 +2,7 @@
 
 <div class = "header">
     <div class ="title">Game of the Year
-    </br>2015
+    </br>2015&nbsp&nbsp&nbsp&nbsp<i class="fa fa-gamepad"></i>
     </div>
     {{if auth.user_id is None:}}
     <h2>
@@ -28,18 +28,32 @@
         <button class="btn btn-primary btn-lg" on-click="new-cat">Create a New Category</button>
 </div>
 {{pass}}
-{% draft_id %}
 
 <div class="categoriesList">
     {% #cat_dict:cat_id %}
          <div class="catDivList">
            {% #if is_editing === false %}
+                <span id="bold">
                 {% cat_name %}
-                | Current Front Runner
-                | Number of Votes
-                | Number of Discs
+                | Leading: <span id="fancy">{% front_runner %}</span> with {% front_votes %} votes
+                </span>
+                <br>
+                {% #if total_votes > 0 %}
+                     &nbsp&nbsp&nbsp {% total_votes %} Voters <i class="fa fa-check-square-o"></i>
+                {% else %}
+                     &nbsp&nbsp&nbsp {% total_votes %} Voters <i class="fa fa-square-o"></i>
+                {% /if %}
+                {% #if total_discs > 0 %}
+                    | {% total_discs %} Discussions <i class="fa fa-comments"></i>
+                {% else %}
+                    | {% total_discs %} Discussions <i class="fa fa-comments-o"></i>
+                {% /if %}
+                <a href="{% cat_url + "/" +cat_id %}">
+                    <button class="btn btn-primary">View Nominees</button></a>
+                <!--
                 <button class="btn btn-success" data-catid="{% cat_id %}" on-click="startedit">Edit</button>
                 <button class="btn btn-warning" data-catid="{% cat_id %}" on-click="delete-cat">Delete</button>
+                -->
            {% else %}
                 <textarea rows="1" cols="50" id="editarea" data-catid="{% cat_id %}" on-blur="editdone" data-areaid="{% cat_id %}" value="{% cat_name %}">
                 </textarea>
@@ -62,6 +76,7 @@ $(function() {
       user_id: "{{=user_id}}",
       active_cat_name: "",
       active_cat_id: "",
+      cat_url: "{{=URL('default','show_cat')}}",
       cat_dict: {}
     },
   });

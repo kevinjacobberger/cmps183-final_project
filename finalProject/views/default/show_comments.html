@@ -2,7 +2,7 @@
 
 <div class = "header">
     <div class ="title">Game of the Year
-    </br>2015
+    </br>2015&nbsp&nbsp&nbsp&nbsp<i class="fa fa-gamepad"></i>
     </div>
     {{if auth.user_id is None:}}
     <h2>
@@ -28,16 +28,22 @@
         <button class="btn btn-primary btn-lg" on-click="new-com">Create a New Comment</button>
 </div>
 {{pass}}
-{% draft_id %}
 
 <div class="categoriesList">
     {% #com_dict:com_id %}
          <div class="catDivList">
            {% #if is_editing === false %}
                 {% com_name %}
-                | Posted by {% author %}
-                <button class="btn btn-success" data-comid="{% com_id %}" on-click="startedit">Edit</button>
-                <button class="btn btn-warning" data-comid="{% com_id %}" on-click="delete-com">Delete</button>
+                <br>
+                {% #if author == user_id %}
+                    <span id="fancy">&nbsp&nbsp&nbsp Posted by You!</span>
+                {% else %}
+                    <span id="fancy">&nbsp&nbsp&nbsp Posted by Somebody Else</span>
+                {% /if %}
+                {% #if author == user_id %}
+                    <button class="btn btn-success" data-comid="{% com_id %}" on-click="startedit">Edit</button>
+                    <button class="btn btn-warning" data-comid="{% com_id %}" on-click="delete-com">Delete</button>
+                {% /if %}
            {% else %}
                 <textarea rows="1" cols="50" id="editarea" data-comid="{% com_id %}" on-blur="editdone" data-areaid="{% com_id %}" value="{% com_name %}">
                 </textarea>

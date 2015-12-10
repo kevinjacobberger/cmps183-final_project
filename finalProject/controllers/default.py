@@ -49,17 +49,82 @@ def show_comments():
 def load_cats():
     """Loads all Categories"""
     rows = db().select(db.cats.ALL)
+    number_of_votes = 0
+    for v in rows:
+        """fetches all games that match current category"""
+        votes = db(db.games.cat_loc == v.cat_id).select(db.games.ALL)
+        for vo in votes:
+            number_of_votes += vo.game_votes
+        db.cats.update_or_insert((db.cats.cat_id == v.cat_id),
+            total_votes=number_of_votes)
+        number_of_votes = 0
+    """determines total number of discussions"""
+    for di in rows:
+        discs = db(db.discs.cat_loc == di.cat_id).count()
+        db.cats.update_or_insert((db.cats.cat_id == di.cat_id),
+            total_discs=discs)
+    """determines front runner for each category"""
+    for fr in rows:
+        if db(db.games.cat_loc == fr.cat_id).count() > 0:
+            fronter = 0
+            fronter_name = "none"
+            games = db(db.games.cat_loc == fr.cat_id).select(db.games.ALL)
+            for g in games:
+                if fronter < g.game_votes:
+                    fronter = g.game_votes
+                    fronter_name = g.game_name
+            db.cats.update_or_insert((db.cats.cat_id == fr.cat_id),
+                front_runner=fronter_name,
+                front_votes=fronter)
+    """loads the updated categories"""
     d = {r.cat_id: {'cat_name': r.cat_name,
                         'is_editing': r.is_editing,
+                        'total_votes': r.total_votes,
+                        'total_discs': r.total_discs,
+                        'front_runner': r.front_runner,
+                        'front_votes': r.front_votes,
                         }
          for r in rows}
     return response.json(dict(cat_dict=d))
 
+
 def load_4_cats():
     """Loads the top 4 Categories"""
     rows = db().select(db.cats.ALL, limitby=(0,4))
+    number_of_votes = 0
+    for v in rows:
+        """fetches all games that match current category"""
+        votes = db(db.games.cat_loc == v.cat_id).select(db.games.ALL)
+        for vo in votes:
+            number_of_votes += vo.game_votes
+        db.cats.update_or_insert((db.cats.cat_id == v.cat_id),
+            total_votes=number_of_votes)
+        number_of_votes = 0
+    """determines total number of discussions"""
+    for di in rows:
+        discs = db(db.discs.cat_loc == di.cat_id).count()
+        db.cats.update_or_insert((db.cats.cat_id == di.cat_id),
+            total_discs=discs)
+    """determines front runner for each category"""
+    for fr in rows:
+        if db(db.games.cat_loc == fr.cat_id).count() > 0:
+            fronter = 0
+            fronter_name = "none"
+            games = db(db.games.cat_loc == fr.cat_id).select(db.games.ALL)
+            for g in games:
+                if fronter < g.game_votes:
+                    fronter = g.game_votes
+                    fronter_name = g.game_name
+            db.cats.update_or_insert((db.cats.cat_id == fr.cat_id),
+                front_runner=fronter_name,
+                front_votes=fronter)
+    """loads the updated categories"""
     d = {r.cat_id: {'cat_name': r.cat_name,
                         'is_editing': r.is_editing,
+                        'total_votes': r.total_votes,
+                        'total_discs': r.total_discs,
+                        'front_runner': r.front_runner,
+                        'front_votes': r.front_votes,
                         }
          for r in rows}
     return response.json(dict(cat_dict=d))
@@ -67,12 +132,17 @@ def load_4_cats():
 def load_discs():
     """Loads the correct discs within each cat"""
     discs_list = db(db.discs.cat_loc == request.vars.cat_id).select(db.discs.ALL)
+    for com in discs_list:
+        comments = db(db.comments.disc_loc == com.disc_id).count()
+        db.discs.update_or_insert((db.discs.disc_id == com.disc_id),
+            total_comments=comments)
     d = {r.disc_id: {'disc_name': r.disc_name,
                         'is_editing': r.is_editing,
                         'cat_loc': r.cat_loc,
                         'author': r.author,
                         'likes': r.likes,
                         'dislikes': r.dislikes,
+                        'total_comments': r.total_comments,
                         }
          for r in discs_list}
     response.flash = T("Discs Loaded")
