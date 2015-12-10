@@ -47,3 +47,12 @@ db.define_table('games',
              Field('game_votes', 'integer', default=0),
              Field('cat_loc'), # Reference to the category
             )
+
+db.define_table('comments',
+             Field('author', db.auth_user, default=auth.user_id),
+             Field('com_name', 'text'),
+             Field('com_id'), # To uniquely identify categories.
+             Field('is_editing', 'boolean', default=False),
+             Field('com_time', 'datetime', default=datetime.utcnow()),
+             Field('disc_loc'), # Reference to the discussion
+            )

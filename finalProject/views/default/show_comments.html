@@ -1,0 +1,209 @@
+{{extend 'layout.html'}}
+
+<div class = "header">
+    <div class ="title">Game of the Year
+    </br>2015
+    </div>
+    {{if auth.user_id is None:}}
+    <h2>
+        {{=A('Sign Up', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['register']))}}
+        &nbsp
+        {{=A('Sign In', _class='btn btn-success btn-lg', _href=URL('default', 'user', args=['login']))}}
+    </h2>
+    {{else:}}
+    <h2>
+        {{=A('Logout', _class='btn btn-danger btn-lg', _href=URL('default', 'user', args=['logout']))}}
+    </h2>
+    {{pass}}
+</div>
+
+<div id="target"></div>
+
+<script id="template" type="text/ractive">
+
+<h1>{% disc_name %}</h1>
+
+{{if auth.user_id is not None:}}
+<div class ="newBoPo">
+        <button class="btn btn-primary btn-lg" on-click="new-com">Create a New Comment</button>
+</div>
+{{pass}}
+{% draft_id %}
+
+<div class="categoriesList">
+    {% #com_dict:com_id %}
+         <div class="catDivList">
+           {% #if is_editing === false %}
+                {% com_name %}
+                | Posted by {% author %}
+                <button class="btn btn-success" data-comid="{% com_id %}" on-click="startedit">Edit</button>
+                <button class="btn btn-warning" data-comid="{% com_id %}" on-click="delete-com">Delete</button>
+           {% else %}
+                <textarea rows="1" cols="50" id="editarea" data-comid="{% com_id %}" on-blur="editdone" data-areaid="{% com_id %}" value="{% com_name %}">
+                </textarea>
+           {% /if %}
+         </div>
+    {% /disc_dict %}
+</div>
+</script>
+
+<script>
+$(function() {
+  // Ractive object
+  var MAIN = new Ractive({
+    el: '#target',
+    template: '#template',
+    delimiters: ['{%', '%}'],
+    tripleDelimiters: ['{%%', '%%}'],
+    data: {
+      draft_id: "{{=draft_id}}",
+      user_id: "{{=user_id}}",
+      disc_name: "{{=disc_name}}",
+      disc_id: "{{=disc_id}}",
+      com_dict: {}
+    },
+  });
+
+  // Loads the comments to display
+  $.ajax("{{=URL('default', 'load_comments')}}",
+          {
+            data:  {
+              disc_id: MAIN.get('disc_id')  //request.vars.disc_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('com_dict', data['com_dict']);
+            }
+          }
+  );
+
+  // Called to update display of discussions
+  function update() {
+      // Loads the comments to display
+      $.ajax("{{=URL('default', 'load_comments')}}",
+              {
+                data:  {
+                  disc_id: MAIN.get('disc_id')  //request.vars.disc_id
+                },
+                method: 'POST',
+                success: function (data) {
+                  MAIN.set('com_dict', data['com_dict']);
+                }
+              }
+      );
+  }
+
+  //Creates new, empty discussion
+  MAIN.on("new-com", function(e) {
+     var x = MAIN.get('draft_id');
+     send_message('', x, false, true);
+     MAIN.set('draft_id', generateUUID());
+     $("#editarea").focus();
+  });
+
+   function send_message(com_content, com_id, is_draft, is_editing) {
+    $.ajax("{{=URL('default', 'add_comment', user_signature=True)}}",
+            {
+              data: {
+                user_id: MAIN.get('user_id'),
+                com: com_content, // request.vars.com
+                is_draft: is_draft, // request.vars.is_draft
+                com_id: com_id, // request.vars.com_id
+                disc_loc: MAIN.get('disc_id'),
+                is_editing: is_editing
+              },
+              method: 'POST',
+              success: function() {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var com_dict = MAIN.get('com_dict');
+                if (com_id in com_dict) {
+                  // We have sent to the server a message/draft we have already in the dict.
+                  com_dict[com_id]['com_name'] = com_content;
+                  com_dict[com_id]['disc_loc'] = MAIN.get('disc_id');
+                  com_dict[com_id]['is_editing'] = false;
+                } else {
+                  // This is a new message or draft.  We have to create a new entry in the dict.
+                  com_dict[com_id] = {
+                    com_name: com_content,
+                    disc_loc: MAIN.get('disc_id')
+                  }
+                }
+                MAIN.set('com_dict', com_dict);
+              },
+              error: function() {}
+            }
+    );
+  }
+
+  MAIN.on("startedit", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('comid');
+    var com_dict = MAIN.get('com_dict');
+    //set is_editing to true
+     $.ajax("{{=URL('default', 'edit_com', user_signature=True)}}",
+            {
+              data: {
+                com_id: clicked_id, // request.vars.disc_id
+                is_editing: true
+              },
+              method: 'POST',
+              success: function() {
+              // Change the selected board to editing
+              var com_dict = MAIN.get('com_dict');
+              com_dict[clicked_id]['is_editing'] = true;
+              MAIN.set('com_dict', com_dict);
+              },
+              error: function() {}
+            }
+     );
+    $("#editarea").focus();
+    MAIN.set('draft_id', clicked_id);
+  });
+
+  MAIN.on("editdone", function(e) {
+    var t = $(e.original.target);
+    var clicked_id = t.data('comid');
+    var com_dict = MAIN.get('com_dict');
+    com_dict[clicked_id]['is_editing'] = false;
+    var com_content = com_dict[clicked_id]['com_name'];
+    send_message(com_content, clicked_id, false, false);
+    MAIN.set('draft_id', generateUUID());
+    update();
+  });
+
+  //Deletes the selected comment
+  MAIN.on("delete-com", function(e) {
+     var t = $(e.original.target);
+     var clicked_id = t.data('comid');
+     $.ajax("{{=URL('default', 'delete_com', user_signature=True)}}",
+          {
+          data: {
+                com_id: clicked_id // request.vars.disc_id
+              },
+            method: 'DELETE',
+            success: function (result) {
+                // Reflect in the list of drafts or messages the update sent to the server.
+                var com_dict = MAIN.get('com_dict');
+                MAIN.set('com_dict', com_dict);
+                update();
+            }
+          }
+     );
+  });
+
+
+  // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+  function generateUUID(){
+    var d = new Date().getTime();
+    if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now();; //use high-precision timer if available
+    }
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+  }
+});
+</script>

@@ -37,9 +37,27 @@ def show_cat():
     response.flash = T(cat_name)
     return dict(draft_id=draft_id, cat_name=cat_name, cat_id=cat_id, user_id=user_id)
 
+def show_comments():
+    draft_id = gluon_utils.web2py_uuid()
+    disc_id = request.args(0)
+    user_id = auth.user_id
+    rows = db(db.discs.disc_id == disc_id).select(db.discs.ALL)
+    first_disc = rows.first()
+    disc_name = first_disc.disc_name
+    return dict(draft_id=draft_id, disc_name=disc_name, disc_id=disc_id, user_id=user_id)
+
 def load_cats():
     """Loads all Categories"""
     rows = db().select(db.cats.ALL)
+    d = {r.cat_id: {'cat_name': r.cat_name,
+                        'is_editing': r.is_editing,
+                        }
+         for r in rows}
+    return response.json(dict(cat_dict=d))
+
+def load_4_cats():
+    """Loads the top 4 Categories"""
+    rows = db().select(db.cats.ALL, limitby=(0,4))
     d = {r.cat_id: {'cat_name': r.cat_name,
                         'is_editing': r.is_editing,
                         }
@@ -73,6 +91,18 @@ def load_games():
     response.flash = T("Games Loaded")
     return response.json(dict(game_dict=d))
 
+def load_comments():
+    """Loads the correct comments within every disc"""
+    coms_list = db(db.comments.disc_loc == request.vars.disc_id).select(db.comments.ALL)
+    d = {r.com_id: {'com_name': r.com_name,
+                        'is_editing': r.is_editing,
+                        'disc_loc': r.disc_loc,
+                        'author': r.author,
+                        }
+         for r in coms_list}
+    response.flash = T("Comments Loaded")
+    return response.json(dict(com_dict=d))
+
 @auth.requires_signature()
 def add_cat():
     db.cats.update_or_insert((db.cats.cat_id == request.vars.cat_id),
@@ -100,7 +130,16 @@ def add_game():
             game_id=request.vars.game_id,
             game_name=request.vars.game,
             cat_loc=request.vars.cat_loc,
-            game_votes=0,
+            is_editing=request.vars.is_editing)
+    return "ok"
+
+@auth.requires_signature()
+def add_comment():
+    db.comments.update_or_insert((db.comments.com_id == request.vars.com_id),
+            author=request.vars.user_id,
+            com_id=request.vars.com_id,
+            com_name=request.vars.com,
+            disc_loc=request.vars.disc_loc,
             is_editing=request.vars.is_editing)
     return "ok"
 
@@ -127,11 +166,22 @@ def cast_vote():
             game_votes=request.vars.votes)
     return "ok"
 
+def cast_like():
+    db.discs.update_or_insert((db.discs.disc_id == request.vars.disc_id),
+            likes=request.vars.the_likes)
+    return "ok"
+
+def cast_dislike():
+    db.discs.update_or_insert((db.discs.disc_id == request.vars.disc_id),
+            dislikes=request.vars.the_dislikes)
+    return "ok"
+
 @auth.requires_signature()
 def delete_cat():
     cat_to_delete = request.vars.cat_id
     """delete the selected Category"""
     db(db.cats.cat_id == cat_to_delete).delete()
+    db(db.discs.cat_loc == cat_to_delete).delete()
     return "ok"
 
 @auth.requires_signature()
@@ -139,6 +189,7 @@ def delete_disc():
     disc_to_delete = request.vars.disc_id
     """delete the selected Discussion"""
     db(db.discs.disc_id == disc_to_delete).delete()
+    db(db.comments.disc_loc == disc_to_delete).delete()
     return "ok"
 
 @auth.requires_signature()

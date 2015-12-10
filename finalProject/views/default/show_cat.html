@@ -31,15 +31,18 @@
 
 <div class="categoriesList">
     {% #game_dict:game_id %}
-         <div class="catDivList">
+         <div class="gameDiv">
            {% #if is_editing === false %}
                 {% game_name %}
-                {% game_votes %} Votes
-                <button class="btn btn-primary" data-gameid="{% game_id %}" on-click="cast-vote">Vote</button>
+                <hr>
+                <span id="normal">{% game_votes %} Votes</span>
+                <hr>
+                <button class="fa fa-square-o" data-gameid="{% game_id %}" on-click="cast-vote">&nbspVote</button>
+                <hr>
                 <button class="btn btn-success" data-gameid="{% game_id %}" on-click="starteditGame">Edit</button>
                 <button class="btn btn-warning" data-gameid="{% game_id %}" on-click="delete-game">Delete</button>
            {% else %}
-                <textarea rows="1" cols="50" id="editarea" data-gameid="{% game_id %}" on-blur="editdoneGame" data-areaid="{% game_id %}" value="{% game_name %}">
+                <textarea rows="2" cols="13" id="editarea" data-gameid="{% game_id %}" on-blur="editdoneGame" data-areaid="{% game_id %}" value="{% game_name %}">
                 </textarea>
            {% /if %}
          </div>
@@ -60,7 +63,10 @@
                 {% disc_name %}
                 | Posted by {% author %}
                 | Number of Comments
-                | Number of Likes
+                <a href="{% disc_url + "/" +disc_id %}">
+                    <button class="btn btn-primary">View Comments</button></a>
+                | {% likes %} <button class="fa fa-thumbs-o-up" data-discid="{% disc_id %}" on-click="cast-like">&nbspLike</button>
+                | {% dislikes %} <button class="fa fa-thumbs-o-down" data-discid="{% disc_id %}" on-click="cast-dislike">&nbspDislike</button>
                 <button class="btn btn-success" data-discid="{% disc_id %}" on-click="startedit">Edit</button>
                 <button class="btn btn-warning" data-discid="{% disc_id %}" on-click="delete-disc">Delete</button>
            {% else %}
@@ -87,6 +93,7 @@ $(function() {
       cat_id: "{{=cat_id}}",
       active_cat_name: "",
       active_cat_id: "",
+      disc_url: "{{=URL('default','show_comments')}}",
       game_dict: {},
       disc_dict: {}
     },
@@ -184,7 +191,8 @@ $(function() {
                   // This is a new message or draft.  We have to create a new entry in the dict.
                   disc_dict[disc_id] = {
                     disc_name: disc_content,
-                    game_votes: 0,
+                    likes: 0,
+                    dislikes: 0,
                     cat_loc: MAIN.get('cat_id')
                   }
                 }
@@ -362,6 +370,50 @@ $(function() {
     );
   });
 
+  MAIN.on("cast-like", function(e) {
+     var t = $(e.original.target);
+     var sel_disc_id = t.data('discid');
+     var disc_dict = MAIN.get('disc_dict');
+     var d_likes = disc_dict[sel_disc_id]['likes']+1;
+    $.ajax("{{=URL('default', 'cast_like', user_signature=True)}}",
+            {
+              data: {
+                disc_id: sel_disc_id, // request.vars.disc_id
+                the_likes: d_likes // request.vars.likes
+              },
+              method: 'POST',
+              success: function() {
+                  disc_dict[sel_disc_id]['likes']= d_likes;
+                  MAIN.set('disc_dict',disc_dict);
+                  update();
+              },
+              error: function() {}
+            }
+    );
+  });
+
+  MAIN.on("cast-dislike", function(e) {
+     var t = $(e.original.target);
+     var sel_disc_id = t.data('discid');
+     var disc_dict = MAIN.get('disc_dict');
+     var d_dislikes = disc_dict[sel_disc_id]['dislikes']+1;
+    $.ajax("{{=URL('default', 'cast_dislike', user_signature=True)}}",
+            {
+              data: {
+                disc_id: sel_disc_id, // request.vars.disc_id
+                the_dislikes: d_dislikes // request.vars.the_dislikes
+              },
+              method: 'POST',
+              success: function() {
+                  disc_dict[sel_disc_id]['dislikes']= d_dislikes;
+                  MAIN.set('disc_dict',disc_dict);
+                  update();
+              },
+              error: function() {}
+            }
+    );
+  });
+
 
   // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
   function generateUUID(){
@@ -376,6 +428,5 @@ $(function() {
     });
     return uuid;
   }
-
 });
 </script>

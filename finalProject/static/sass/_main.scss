@@ -4,7 +4,7 @@
 
 .title {
   color: $clrBlack;
-  font-size: 2.5em;
+  font-size: 2em;
   font-family: Arial, Helvetica, sans-serif;
   background-color: $clrTiBg;
   padding: 0.5em;
@@ -12,7 +12,7 @@
   margin-top: 1em;
   margin-bottom: 0em;
   @include border-radius(1em);
-  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
   display: inline-block;
   border: 0.5em ridge $clrTitle;
 }
@@ -27,7 +27,7 @@ h2 {
   padding-top: 1.5;
   background-color: $clrGreyBg;
   padding-bottom: 1.2em;
-  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
 }
 
 .catDiv {
@@ -41,7 +41,23 @@ h2 {
   width: 40em;
   height: 3.5em;
   vertical-align: top;
-  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+  display: inline-block;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+  border: 0.2em outset $clrTitle;
+}
+
+.discDiv {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
+  padding: 1em;
+  background-color: $clrGreyBg;
+  width: 40em;
+  height: 3.5em;
+  vertical-align: bottom;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
   border: 0.2em outset $clrTitle;
 }
 
@@ -55,8 +71,52 @@ h2 {
   width: 55em;
   height: 4em;
   vertical-align: top;
-  @include box-shadow(rgba(#000,0.7) 0 4px 10px 2px);
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
   border: 0.2em outset $clrTitle;
+}
+
+.discList {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  padding: 1em;
+  background-color: $clrGreyBg;
+  width: 82em;
+  height: 4em;
+  text-align: center;
+  vertical-align: top;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+  border: 0.2em outset $clrTitle;
+}
+
+.gameDiv {
+  font-size: 1.5em;
+  font-weight: bold;
+  font-style: italic;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  padding: 0em;
+  padding-bottom: 1em;
+  padding-top: 1em;
+  background-color: $clrGreyBg;
+  width: 11em;
+  height: 15em;
+  text-align: center;
+  vertical-align: top;
+  display: inline-block;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+  border: 0.2em outset $clrTitle;
+  #normal {
+    font-style: normal;
+  }
+}
+
+hr {
+    color: $clrRed;
+    border-style: solid;
+    border-width: 0.2em;
 }
 
 .categories {
@@ -64,6 +124,16 @@ h2 {
   padding: 2em;
   background-color: $clrTiBg;
   float: right;
+  width: 65em;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+  #center {
+    text-align: center;
+  }
+}
+
+.moreCats {
+  font-size: 1.5em;
+  text-align: center;
 }
 
 .categoriesList {
@@ -71,22 +141,34 @@ h2 {
   padding: 2em;
   background-color: $clrTiBg;
   float: center;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+
 }
 
 .graphs {
-  width: 50em;
+  width: 60em;
   height: 30em;
   margin: 2em;
+  margin-top: 1em;
+  margin-right: 0em;
   padding: 2em;
   background-color: $clrTiBg;
   float: left;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+
 }
 
 .discussions {
-  width: 50em;
-  height: 30em;
-  margin: 2em;
-  padding: 2em;
-  background-color: $clrTiBg;
+  margin: 0.5em;
+  margin-top: 0em;
+  margin-left: 1.8em;
+  padding: 1em;
+  background-color: $clrGreyBg;
+  vertical-align: top;
+  display: inline-block;
+  @include box-shadow(rgba(#FFFFFF,0.7) 0 4px 10px 2px);
+}
 
+body {
+  background-color: $clrBlack;
 }

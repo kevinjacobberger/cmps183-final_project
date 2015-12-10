@@ -21,8 +21,6 @@
 
 <script id="template" type="text/ractive">
 
-{% draft_id %}
-
 <div class="graphs">
 <h4>Graphs Placeholder
 {% active_cat_name %}
@@ -44,14 +42,30 @@
            {% /if %}
          </div>
     {% /cat_dict %}
-     <a href="{{=URL('default','catsList')}}">
-        <button class="btn btn-success">More Categories</button></a>
+    <div class="moreCats">
+        <a href="{{=URL('default','catsList')}}">
+            <button class="fa fa-ellipsis-h"></button></a>
+    </div>
 </div>
 
 <div class="discussions">
     {% #disc_dict:disc_id %}
         <div class ="discList">
             {% disc_name %}
+            <a href="{% disc_url + "/" +disc_id %}">
+                    <button class="btn btn-primary">View Discussion</button></a>
+            {% #if likes > dislikes %}
+                {% likes %} <i class="fa fa-thumbs-up"></i>
+                {% dislikes %} <i class="fa fa-thumbs-o-down"></i>
+            {% /if %}
+            {% #if likes < dislikes %}
+                {% likes %} <i class="fa fa-thumbs-o-up"></i>
+                {% dislikes %} <i class="fa fa-thumbs-down"></i>
+            {% /if %}
+            {% #if likes === dislikes %}
+                {% likes %} <i class="fa fa-thumbs-o-up"></i>
+                {% dislikes %} <i class="fa fa-thumbs-o-down"></i>
+            {% /if %}
         </div>
     {% /disc_dict %}
 </div>
@@ -70,13 +84,14 @@ $(function() {
       active_cat_name: "{{=active_cat_name}}",
       active_cat_id: "{{=active_cat_id}}",
       cat_url: "{{=URL('default','show_cat')}}",
+      disc_url: "{{=URL('default','show_comments')}}",
       cat_dict: {},
       disc_dict: {}
     },
   });
 
   // Loads the categories to display
-  $.ajax("{{=URL('default', 'load_cats')}}",
+  $.ajax("{{=URL('default', 'load_4_cats')}}",
           {
             method: 'POST',
             success: function (data) {
@@ -100,7 +115,7 @@ $(function() {
 
   // Called to update display of boards
   function update() {
-    $.ajax("{{=URL('default', 'load_cats')}}",
+    $.ajax("{{=URL('default', 'load_4_cats')}}",
           {
             method: 'POST',
             success: function (data) {
@@ -108,6 +123,17 @@ $(function() {
             }
           }
     );
+    $.ajax("{{=URL('default', 'load_discs')}}",
+          {
+            data:  {
+              cat_id: MAIN.get('active_cat_id')  //request.vars.cat_id
+            },
+            method: 'POST',
+            success: function (data) {
+              MAIN.set('disc_dict', data['disc_dict']);
+            }
+          }
+  );
   }
 
   //Creates new, empty category

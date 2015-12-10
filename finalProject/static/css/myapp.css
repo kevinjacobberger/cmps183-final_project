@@ -6,7 +6,7 @@
 /* line 5, ../sass/_main.scss */
 .title {
   color: #000000;
-  font-size: 2.5em;
+  font-size: 2em;
   font-family: Arial, Helvetica, sans-serif;
   background-color: #6194BC;
   padding: 0.5em;
@@ -16,9 +16,9 @@
   -moz-border-radius: 1em;
   -webkit-border-radius: 1em;
   border-radius: 1em;
-  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   display: inline-block;
   border: 0.5em ridge #E4001B;
 }
@@ -35,9 +35,9 @@ h2 {
   padding-top: 1.5;
   background-color: #D1D1D1;
   padding-bottom: 1.2em;
-  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
 
 /* line 33, ../sass/_main.scss */
@@ -52,13 +52,32 @@ h2 {
   width: 40em;
   height: 3.5em;
   vertical-align: top;
-  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  display: inline-block;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   border: 0.2em outset #E4001B;
 }
 
-/* line 48, ../sass/_main.scss */
+/* line 49, ../sass/_main.scss */
+.discDiv {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  margin-right: 0.5em;
+  padding: 1em;
+  background-color: #D1D1D1;
+  width: 40em;
+  height: 3.5em;
+  vertical-align: bottom;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  border: 0.2em outset #E4001B;
+}
+
+/* line 64, ../sass/_main.scss */
 .catDivList {
   font-size: 1.5em;
   margin: 1em;
@@ -69,43 +88,127 @@ h2 {
   width: 55em;
   height: 4em;
   vertical-align: top;
-  -moz-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  -webkit-box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
-  box-shadow: rgba(0, 0, 0, 0.7) 0 4px 10px 2px;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
   border: 0.2em outset #E4001B;
 }
 
-/* line 62, ../sass/_main.scss */
+/* line 78, ../sass/_main.scss */
+.discList {
+  font-size: 1.5em;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  padding: 1em;
+  background-color: #D1D1D1;
+  width: 82em;
+  height: 4em;
+  text-align: center;
+  vertical-align: top;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  border: 0.2em outset #E4001B;
+}
+
+/* line 93, ../sass/_main.scss */
+.gameDiv {
+  font-size: 1.5em;
+  font-weight: bold;
+  font-style: italic;
+  margin: 1em;
+  margin-top: 0em;
+  margin-bottom: 0.5em;
+  padding: 0em;
+  padding-bottom: 1em;
+  padding-top: 1em;
+  background-color: #D1D1D1;
+  width: 11em;
+  height: 15em;
+  text-align: center;
+  vertical-align: top;
+  display: inline-block;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  border: 0.2em outset #E4001B;
+}
+/* line 111, ../sass/_main.scss */
+.gameDiv #normal {
+  font-style: normal;
+}
+
+/* line 116, ../sass/_main.scss */
+hr {
+  color: #FF0000;
+  border-style: solid;
+  border-width: 0.2em;
+}
+
+/* line 122, ../sass/_main.scss */
 .categories {
   margin: 1em;
   padding: 2em;
   background-color: #6194BC;
   float: right;
+  width: 65em;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+}
+/* line 129, ../sass/_main.scss */
+.categories #center {
+  text-align: center;
 }
 
-/* line 69, ../sass/_main.scss */
+/* line 134, ../sass/_main.scss */
+.moreCats {
+  font-size: 1.5em;
+  text-align: center;
+}
+
+/* line 139, ../sass/_main.scss */
 .categoriesList {
   margin: 2em;
   padding: 2em;
   background-color: #6194BC;
   float: center;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
 
-/* line 76, ../sass/_main.scss */
+/* line 148, ../sass/_main.scss */
 .graphs {
-  width: 50em;
+  width: 60em;
   height: 30em;
   margin: 2em;
+  margin-top: 1em;
+  margin-right: 0em;
   padding: 2em;
   background-color: #6194BC;
   float: left;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
 }
 
-/* line 85, ../sass/_main.scss */
+/* line 161, ../sass/_main.scss */
 .discussions {
-  width: 50em;
-  height: 30em;
-  margin: 2em;
-  padding: 2em;
-  background-color: #6194BC;
+  margin: 0.5em;
+  margin-top: 0em;
+  margin-left: 1.8em;
+  padding: 1em;
+  background-color: #D1D1D1;
+  vertical-align: top;
+  display: inline-block;
+  -moz-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  -webkit-box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+  box-shadow: rgba(255, 255, 255, 0.7) 0 4px 10px 2px;
+}
+
+/* line 172, ../sass/_main.scss */
+body {
+  background-color: #000000;
 }
