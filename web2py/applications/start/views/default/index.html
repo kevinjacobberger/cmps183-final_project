@@ -23,15 +23,7 @@
 
 <div class="graphs">
 <h4>
-{% #top3:g %}
-{%top3[g]['game_name']%}
-{%/top3%}
-{% #game_dict:game_id %}
-{%game_dict[game_id]['game_name']%}
-{%/top3%}
 {%top3[0]['game_name']%} {%top3[1]['game_name']%}  {%top3[2]['game_name']%}
-
-
 </h4>.
 
 <svg width = "100%" height = "80%" >
@@ -125,14 +117,15 @@ $(function() {
             method: 'POST',
             success: function (data) {
               MAIN.set('game_dict', data['game_dict']);
-              top3();
+              top3(true);
             }
           }
   );
 
          //Orders an array of games by # of votes, get top 3
-    function top3() {
+    function top3(on_load) {
         var game_chart_ordered = [];
+        var top3 = MAIN.get('top3');
         var game_dict = MAIN.get('game_dict');
         var num_games = 0;
         for (game_id in game_dict) {
@@ -151,18 +144,30 @@ $(function() {
         MAIN.set('game_chart_ordered', game_chart_ordered);
         var game_chart_ordered = MAIN.get('game_chart_ordered');
         var denominator = game_chart_ordered[0][1];
-        for (i=0;i<3;i++){
-            top3[i] = {
-                game_name: game_chart_ordered[i][0],
-                votes: game_chart_ordered[i][1],
-                votePercent: toPercent(game_chart_ordered[i][1],denominator),
-                percentDif: (100 - toPercent(game_chart_ordered[i][1],denominator))
+     if(on_load) {
+         for (i = 0; i < 3; i++) {
+             top3[i] = {
+                 game_name: game_chart_ordered[i][0],
+                 votes: game_chart_ordered[i][1],
+                 votePercent: toPercent(game_chart_ordered[i][1], denominator),
+                 percentDif: (100 - toPercent(game_chart_ordered[i][1], denominator))
 
-            }
-        }
+             }
+         }
+
         MAIN.set('top3', top3);
+     }
+     else{
+         for (i = 0; i < 3; i++) {
+             top3[i]['game_name']= game_chart_ordered[i][0];
+             top3[i]['votes']=game_chart_ordered[i][1];
+             top3[i]['votePercent']= toPercent(game_chart_ordered[i][1], denominator);
+             top3[i]['percentDif']= (100 - toPercent(game_chart_ordered[i][1], denominator));
+             }
+
+        MAIN.set('top3', top3);
+     }
         var top = MAIN.get('top3');
-        alert(top[0]['game_name']);
     }
 
     function toPercent(votes, denominator){
@@ -190,7 +195,8 @@ $(function() {
             method: 'POST',
             success: function (data) {
               MAIN.set('game_dict', data['game_dict']);
-              top3();
+                MAIN.get()
+              top3(false);
             }
           }
   );
